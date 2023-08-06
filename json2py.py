@@ -73,10 +73,16 @@ def parse_binary_expr(test):
 
 
 def parse_if(bo):
+    orelse = []
+    if alternate := bo.get('alternate'):
+        orelse = parse_statement(alternate)
+        if not isinstance(orelse, list):
+            orelse = [orelse]
+    
     return ast.If(
         test=parse_statement(bo['test']),
         body=parse_statement(bo['consequent']),
-        orelse=[]
+        orelse=orelse
     )
 
 
@@ -118,6 +124,9 @@ def parse_identifier(obj):
 
 
 def parse_statement(b):
+    if b is None:
+        return []
+    
     parser = {
         'BlockStatement': parse_block_statement,
         'VariableDeclaration': parse_variable_declaration,
@@ -137,7 +146,7 @@ def parse_statement(b):
         #    'ForInStatement': None,
         #    'ForOfStatement': None,
         #    'ObjectExpression': None,
-    }[b['type']]
+    }[b.get('type')]
 
     return parser(b)
 
