@@ -5,7 +5,6 @@ import ast
 import esprima
 
 
-
 def parse_variable_declaration(statement):
     declarations = []
     for d in statement['declarations']:
@@ -17,13 +16,14 @@ def parse_variable_declaration(statement):
         declarations.append(
             Assign(
                 targets=[
-                    Name(id=name,ctx=Store())
+                    Name(id=name, ctx=Store())
                 ],
                 value=parse_statement(d['init'])
             )
         )
 
     return declarations
+
 
 def parse_call_expression(expression):
     args = [parse_statement(arg) for arg in expression['arguments']]
@@ -43,6 +43,7 @@ def parse_expression(b):
     return Expr(
         value=parse_statement(b['expression'])
     )
+
 
 def parse_return(b):
     return ast.Return(
@@ -67,8 +68,8 @@ def parse_binary_expr(test):
     rhs = test['right']['value']
     comparators = [Constant(value=rhs)]
     return ast.Compare(left=left,
-                        ops=ops,
-                        comparators=comparators)
+                       ops=ops,
+                       comparators=comparators)
 
 
 def parse_if(bo):
@@ -77,6 +78,7 @@ def parse_if(bo):
         body=parse_statement(bo['consequent']),
         orelse=[]
     )
+
 
 def parse_logical_expression(test_obj):
     bool_ops = {
@@ -110,34 +112,35 @@ def parse_while_loop(b):
 def parse_literal(test_obj):
     return ast.Constant(value=test_obj['value'])
 
+
 def parse_identifier(obj):
     return Name(id=obj['name'], ctx=Load())
 
 
 def parse_statement(b):
     parser = {
-       'BlockStatement': parse_block_statement, 
-       'VariableDeclaration': parse_variable_declaration, 
-       'ExpressionStatement': parse_expression, 
-       'CallExpression': parse_call_expression, 
-       'IfStatement': parse_if, 
-       'ReturnStatement': parse_return, 
-       'FunctionDeclaration': parse_function_declaration, 
-       'WhileStatement': parse_while_loop, 
-       'BinaryExpression': parse_binary_expr, 
-       'Literal': parse_literal, 
-       'Identifier': parse_identifier, 
-       'LogicalExpression': parse_logical_expression, 
-       'MemberExpression': parse_member_expression,
-    #    'FunctionExpression': None, 
-    #    'UnaryExpression': None,
-    #    'ForInStatement': None,
-    #    'ForOfStatement': None,
-    #    'ObjectExpression': None,
+        'BlockStatement': parse_block_statement,
+        'VariableDeclaration': parse_variable_declaration,
+        'ExpressionStatement': parse_expression,
+        'CallExpression': parse_call_expression,
+        'IfStatement': parse_if,
+        'ReturnStatement': parse_return,
+        'FunctionDeclaration': parse_function_declaration,
+        'WhileStatement': parse_while_loop,
+        'BinaryExpression': parse_binary_expr,
+        'Literal': parse_literal,
+        'Identifier': parse_identifier,
+        'LogicalExpression': parse_logical_expression,
+        'MemberExpression': parse_member_expression,
+        #    'FunctionExpression': None,
+        #    'UnaryExpression': None,
+        #    'ForInStatement': None,
+        #    'ForOfStatement': None,
+        #    'ObjectExpression': None,
     }[b['type']]
-    
+
     return parser(b)
-    
+
 
 def parse_member_expression(obj):
 
@@ -150,8 +153,10 @@ def parse_member_expression(obj):
         ctx=Load()
     )
 
+
 def parse_block_statement(obj):
     return parse_body(obj['body'])
+
 
 def parse_body(body_statements):
     statements = []
@@ -163,10 +168,10 @@ def parse_body(body_statements):
             statements.append(statement)
     return statements
 
+
 def parse_function_declaration(statement):
     name = statement['id']['name']
     body = parse_statement(statement['body'])
-
 
     args = [ast.arg(arg=p['name']) for p in statement['params']]
 
@@ -182,13 +187,15 @@ def parse_function_declaration(statement):
         decorator_list=[]
     )
 
+
 def translate_ast(js_ast: dict):
     body = parse_body(js_ast['body'])
-    
+
     return Module(
         body=body,
         type_ignores=[]
     )
+
 
 def get_js_ast(js_code: str) -> dict:
     data = esprima.parse(js_code)
@@ -220,6 +227,7 @@ def main():
 
     with open(file_name.replace('.js', '.py'), 'w+') as f:
         f.write(data_str)
+
 
 if __name__ == "__main__":
     main()

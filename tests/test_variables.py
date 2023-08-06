@@ -1,5 +1,5 @@
 import json2py
-import pytest
+
 
 def test_declare_decimal():
     # arrange
@@ -11,6 +11,7 @@ def test_declare_decimal():
     # assert
     expected_py = "number = 10"
     assert result == expected_py
+
 
 def test_declare_float():
     # arrange
@@ -35,6 +36,7 @@ def test_declare_boolean():
     expected_py = "flag = True"
     assert result == expected_py
 
+
 def test_declare_string():
     # arrange
     js_code = "var text = 'Hello world';"
@@ -45,7 +47,7 @@ def test_declare_string():
     # assert
     expected_py = "text = 'Hello world'"
     assert result == expected_py
-    
+
 
 def test_declare_list():
     # arrange
@@ -57,6 +59,7 @@ def test_declare_list():
     # assert
     expected_py = "collection = [1, 2, 3]"
     assert result == expected_py
+
 
 def test_declare_objects():
     # arrange
