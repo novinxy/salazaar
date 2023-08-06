@@ -2,8 +2,6 @@ import argparse
 from ast import Assign, Constant, Expr, FunctionDef, Load, Module, Store, arguments, Name
 import ast
 
-import json
-
 import esprima
 
 
@@ -80,9 +78,6 @@ def parse_if(bo):
         orelse=[]
     )
 
-def parse_unary_expression(test_obj):
-    return None
-
 def parse_logical_expression(test_obj):
     bool_ops = {
         '&&': ast.And(),
@@ -120,7 +115,7 @@ def parse_identifier(obj):
 
 
 def parse_statement(b):
-    parsers = {
+    parser = {
        'BlockStatement': parse_block_statement, 
        'VariableDeclaration': parse_variable_declaration, 
        'ExpressionStatement': parse_expression, 
@@ -133,18 +128,16 @@ def parse_statement(b):
        'Literal': parse_literal, 
        'Identifier': parse_identifier, 
        'LogicalExpression': parse_logical_expression, 
-       'MemberExpression': parse_member_expression, 
-       'FunctionExpression': parse_function_expression, 
-       'UnaryExpression': parse_unary_expression, 
-    }
+       'MemberExpression': parse_member_expression,
+    #    'FunctionExpression': None, 
+    #    'UnaryExpression': None,
+    #    'ForInStatement': None,
+    #    'ForOfStatement': None,
+    #    'ObjectExpression': None,
+    }[b['type']]
     
-    print(b)
-    return parsers[b['type']](b)
+    return parser(b)
     
-
-def parse_function_expression(b):
-    ...
-
 
 def parse_member_expression(obj):
 
@@ -189,26 +182,25 @@ def parse_function_declaration(statement):
         decorator_list=[]
     )
 
-def parse(js_code):
-    js_tree = to_json(js_code)
-
-    ast_ = Module(
-        body=parse_body(js_tree['body']),
+def translate_ast(js_ast: dict):
+    body = parse_body(js_ast['body'])
+    
+    return Module(
+        body=body,
         type_ignores=[]
     )
 
-    print(ast.dump(ast_, indent=4))
-    return ast_
-
-def to_json(js_code):
-
-    # data = esprima.parse(content, options={'comment': True, 'range': True})
+def get_js_ast(js_code: str) -> dict:
     data = esprima.parse(js_code)
     data = data.toDict()
-    with open('result.json', 'w+') as f:
-        json.dump(data, f, indent=4)
     return data
 
+
+def translate_code(js_code: str) -> str:
+    js_tree = get_js_ast(js_code)
+    data = translate_ast(js_tree)
+
+    return ast.unparse(ast.fix_missing_locations(data))
 
 
 def main():
@@ -217,9 +209,12 @@ def main():
     args = parser.parse_args()
 
     file_name = args.file
-    with open(file_name, 'r') as f:
+    with open(file_name, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
-    data = parse(content)
+
+    js_tree = get_js_ast(content)
+    data = translate_ast(js_tree)
+    # print(ast.dump(data, indent=4))
 
     data_str = ast.unparse(ast.fix_missing_locations(data))
 
@@ -228,14 +223,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# tmp = {}
-# if tmp['type'] == 'VariableDeclaration':
-#     name = tmp['declarations'][0]['id']['name']
-#     value = tmp['declarations'][0]['init']['raw']
-#     z = f"""
-#     Assign(
-#         targets=[
-#                 Name[id='{name}',ctx=Store())],
-#         value=Constant(value={value}))
-#     """
