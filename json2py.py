@@ -78,7 +78,7 @@ def parse_if(bo):
         orelse = parse_statement(alternate)
         if not isinstance(orelse, list):
             orelse = [orelse]
-    
+
     return ast.If(
         test=parse_statement(bo['test']),
         body=parse_statement(bo['consequent']),
@@ -126,7 +126,7 @@ def parse_identifier(obj):
 def parse_statement(b):
     if b is None:
         return []
-    
+
     parser = {
         'BlockStatement': parse_block_statement,
         'VariableDeclaration': parse_variable_declaration,
