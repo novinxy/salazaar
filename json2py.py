@@ -1,6 +1,7 @@
 import argparse
 from ast import Assign, Constant, Expr, FunctionDef, Load, Module, Store, arguments, Name
 import ast
+import json
 
 import esprima
 
@@ -64,12 +65,11 @@ def parse_binary_expr(test):
     ops = [ops_map[test['operator']]]
 
     left = parse_statement(test['left'])
+    right = parse_statement(test['right'])
 
-    rhs = test['right']['value']
-    comparators = [Constant(value=rhs)]
     return ast.Compare(left=left,
                        ops=ops,
-                       comparators=comparators)
+                       comparators=[right])
 
 
 def parse_if(bo):
@@ -123,6 +123,23 @@ def parse_identifier(obj):
     return Name(id=obj['name'], ctx=Load())
 
 
+def parse_unary_expression(obj):
+    op = {
+        '-': ast.USub(),
+        '~': ast.Invert(),
+        '!': ast.Not()
+    }[obj['operator']]
+    return ast.UnaryOp(
+        op=op,
+        operand=parse_statement(obj['argument'])
+    )
+
+def parse_object_expr(obj):
+    keys = [parse_statement(p['key']) for p in obj['properties']]
+    values = [parse_statement(p['value']) for p in obj['properties']]
+    return ast.Dict(keys=keys,
+                    values=values)
+
 def parse_statement(b):
     if b is None:
         return []
@@ -141,14 +158,21 @@ def parse_statement(b):
         'Identifier': parse_identifier,
         'LogicalExpression': parse_logical_expression,
         'MemberExpression': parse_member_expression,
+        'UnaryExpression': parse_unary_expression,
+        'ArrayExpression': parse_array_expression,
+        'ObjectExpression': parse_object_expr,
         #    'FunctionExpression': None,
-        #    'UnaryExpression': None,
         #    'ForInStatement': None,
         #    'ForOfStatement': None,
-        #    'ObjectExpression': None,
     }[b.get('type')]
 
     return parser(b)
+
+
+def parse_array_expression(obj):
+    elts = [parse_statement(e) for e in obj['elements']]
+    return ast.List(elts=elts,
+        ctx=Load())
 
 
 def parse_member_expression(obj):
@@ -214,7 +238,13 @@ def get_js_ast(js_code: str) -> dict:
 
 def translate_code(js_code: str) -> str:
     js_tree = get_js_ast(js_code)
+    with open('js_tree.json', mode='w+', encoding='utf-8') as tf:
+        json.dump(js_tree, tf, indent=4)
+    
     data = translate_ast(js_tree)
+    with open('py_tree.py', mode='w+', encoding='utf-8') as tf:
+        tf.write(ast.dump(data, indent=4))
+    
 
     return ast.unparse(ast.fix_missing_locations(data))
 

@@ -57,3 +57,41 @@ def test_for_of_loop(multiline):
     """
     assert result == multiline(expected_py)
 
+
+
+def test_for_loop_ascending(multiline):
+    # arrange
+    js_code = """
+    for (let index = 0; index < array.length; index++) {
+        const element = array[index];
+    }
+    """
+
+    # act
+    result = json2py.translate_code(js_code)
+
+    # assert
+    expected_py = """
+   for index in range(len(array)):
+        element = array[index]
+    """
+    assert result == multiline(expected_py)
+
+ 
+def test_for_loop_descending(multiline):
+    # arrange
+    js_code = """
+    for (let index = array.length - 1; index >= 0; index--) {
+        const element = array[index];
+    }
+    """
+
+    # act
+    result = json2py.translate_code(js_code)
+
+    # assert
+    expected_py = """
+   for index in range(len(arr) -1, -1, -1):
+        element = array[index]
+    """
+    assert result == multiline(expected_py)

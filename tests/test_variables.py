@@ -49,7 +49,7 @@ def test_declare_string():
     assert result == expected_py
 
 
-def test_declare_list():
+def test_declare_simple_list():
     # arrange
     js_code = "var collection = [1, 2, 3];"
 
@@ -61,6 +61,18 @@ def test_declare_list():
     assert result == expected_py
 
 
+def test_declare_list_of_variables():
+    # arrange
+    js_code = "var collection = [var1, var2, var3];"
+
+    # act
+    result = json2py.translate_code(js_code)
+
+    # assert
+    expected_py = "collection = [var1, var2, var3]"
+    assert result == expected_py
+
+
 def test_declare_objects():
     # arrange
     js_code = "var collection = {'key1': 'value1', 'key2': 'value2'};"
@@ -69,5 +81,5 @@ def test_declare_objects():
     result = json2py.translate_code(js_code)
 
     # assert
-    expected_py = "collection =  {'key1': 'value1', 'key2': 'value2'}"
+    expected_py = "collection = {'key1': 'value1', 'key2': 'value2'}"
     assert result == expected_py
