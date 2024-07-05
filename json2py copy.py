@@ -5,40 +5,8 @@ import json
 import os
 
 import esprima
-
-
-def parse_variable_declaration(statement):
-    declarations = []
-    for d in statement['declarations']:
-        name: str = d['id']['name']
-
-        if statement.get('kind', '') == 'const':
-            name = name.upper()
-
-        declarations.append(
-            Assign(
-                targets=[
-                    Name(id=name, ctx=Store())
-                ],
-                value=parse_statement(d['init'])
-            )
-        )
-
-    return declarations
-
-
-def parse_call_expression(expression):
-    args = [parse_statement(arg) for arg in expression['arguments']]
-
-    callee = expression['callee']
-
-    func = parse_statement(callee)
-
-    return ast.Call(
-        func=func,
-        args=args,
-        keywords=[]
-    )
+from expressions.call_expression import CallExpression
+from expressions.variable_declaration import VariableDeclaration
 
 
 def parse_expression(b):
@@ -147,7 +115,6 @@ def parse_unary_expression(obj):
         '~': ast.Invert(),
         '!': ast.Not()
     }[obj['operator']]
-
     return ast.UnaryOp(
         op=op,
         operand=parse_statement(obj['argument'])
@@ -165,11 +132,13 @@ def parse_statement(b):
     if b is None:
         return []
 
+
+
     parser = {
         'BlockStatement': parse_block_statement,
-        'VariableDeclaration': parse_variable_declaration,
+        'VariableDeclaration': VariableDeclaration(parse_statement).parse,
         'ExpressionStatement': parse_expression,
-        'CallExpression': parse_call_expression,
+        'CallExpression': CallExpression(parse_statement).parse,
         'IfStatement': parse_if,
         'ReturnStatement': parse_return,
         'FunctionDeclaration': parse_function_declaration,
@@ -216,6 +185,7 @@ def parse_for_range(obj):
     )
 
 def parse_for_of(obj):
+
     iter = parse_statement(obj['right'])
 
     body = parse_statement(obj['body'])
@@ -230,7 +200,8 @@ def parse_for_of(obj):
 
 def parse_array_expression(obj):
     elts = [parse_statement(e) for e in obj['elements']]
-    return ast.List(elts=elts, ctx=Load())
+    return ast.List(elts=elts,
+                    ctx=Load())
 
 
 def parse_member_expression(obj):

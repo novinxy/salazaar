@@ -1,11 +1,14 @@
 import ast
+from textwrap import dedent
 
 
-expr="""
-if False:
-    tmp = 10
-elif i == 10:
-    tmp = 20
+expr=dedent(
 """
-p=ast.dump(ast.parse(expr), indent=4)
+    False or True and True
+"""
+).strip('\n')
+tree = ast.parse(expr)
+p=ast.dump(tree, indent=4)
 print(p)
+
+print(ast.unparse(ast.fix_missing_locations(tree)))

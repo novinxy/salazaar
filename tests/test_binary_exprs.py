@@ -50,7 +50,7 @@ def test_greater_compare(multiline):
     """
 
     assert py_code == multiline(expected_py)
-    
+
 
 def test_greater_or_equal_compare(multiline):
     # Arrange
@@ -84,7 +84,7 @@ def test_less_compare(multiline):
     """
 
     assert py_code == multiline(expected_py)
-    
+
 
 def test_less_or_equal_compare(multiline):
     # Arrange
