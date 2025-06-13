@@ -7,3 +7,13 @@ requires-python = ">=3.13"
 dependencies = [
     "esprima"
 ]
+
+[dependecy-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "isort",
+    "mypy",
+    "ruff"
+]
