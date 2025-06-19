@@ -1,19 +1,17 @@
 [project]
 name = "salazaar"
 version = "0.1.0"
-description = "Add your description here"
+description = "salaazaar is a Python library for transpiling JavaScript code to Python code."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "esprima"
 ]
 
-[dependecy-groups]
+[dependency-groups]
 dev = [
-    "pytest",
-    "pytest-cov",
-    "black",
-    "isort",
-    "mypy",
-    "ruff"
+    "mypy>=1.16.1",
+    "pytest>=8.4.1",
+    "ruff>=0.12.0",
 ]
+
