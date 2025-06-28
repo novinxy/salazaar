@@ -1,4 +1,4 @@
-import json2py
+import salazaar
 
 
 def test_simple_function(multiline):
@@ -10,7 +10,7 @@ def test_simple_function(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -29,7 +29,7 @@ def test_function_with_argument(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -48,7 +48,7 @@ def test_function_with_multiple_arguments(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """

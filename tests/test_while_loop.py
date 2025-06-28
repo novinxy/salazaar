@@ -1,4 +1,4 @@
-import json2py
+import salazaar.json2py as json2py
 
 
 def test_simple_wile_loop(multiline):

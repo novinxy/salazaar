@@ -1,4 +1,4 @@
-import json2py
+import salazaar
 
 
 def test_simple_if(multiline):
@@ -10,7 +10,7 @@ def test_simple_if(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -31,7 +31,7 @@ def test_else(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -54,7 +54,7 @@ def test_ifelse(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -83,7 +83,7 @@ def test_multiple_elif_plus_else(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """

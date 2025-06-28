@@ -1,4 +1,4 @@
-import json2py
+import salazaar
 
 
 def test_for_in_loop(multiline):
@@ -10,7 +10,7 @@ def test_for_in_loop(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -29,7 +29,7 @@ def test_for_of_loop(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -48,7 +48,7 @@ def test_for_loop_ascending(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
@@ -67,7 +67,7 @@ def test_for_loop_descending(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """
