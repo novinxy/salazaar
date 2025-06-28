@@ -320,7 +320,7 @@ def translate_code(js_code: str, export_ast: bool = False) -> str:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', default='temp.js')
+    parser.add_argument('--file', default='temp.js', required=True)
     args = parser.parse_args()
 
     file_name = args.file
@@ -333,7 +333,7 @@ def main():
 
     data_str = ast.unparse(ast.fix_missing_locations(data))
 
-    with open(file_name.replace('.js', '.py'), 'w+') as f:
+    with open(file_name.replace('.js', '.py'), 'w+', encoding='utf-8') as f:
         f.write(data_str)
 
 

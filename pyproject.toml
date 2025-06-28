@@ -33,3 +33,4 @@ line-length = 120
 
 [project.scripts]
 get-ast = "salazaar.tools.get_ast:main"
+transpile = "salazaar.json2py:main"
