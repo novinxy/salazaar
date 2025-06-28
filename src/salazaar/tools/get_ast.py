@@ -1,18 +1,33 @@
 import ast
-from textwrap import dedent
+import sys
+import argparse
+from typing import TextIO
 
 
 def main():
-    expr=dedent(
-    """
-        False or True and True
-    """
-    ).strip('\n')
-    tree = ast.parse(expr)
-    p=ast.dump(tree, indent=4)
+    parser = argparse.ArgumentParser(description="Get AST of a JavaScript code snippet")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument(
+        "--input_file", type=argparse.FileType("r"), required=False, help="Input JavaScript code file", default=sys.stdin
+    )
+    group.add_argument(
+        "--input", type=str, required=False, help="Input JavaScript code file"
+    )
+    
+    args = parser.parse_args()
+
+    if args.input:
+        code = args.input
+    else:
+        input: TextIO = args.input_file
+
+        code = input.read()
+    tree = ast.parse(code)
+    p = ast.dump(tree, indent=2)
     print(p)
 
-    print(ast.unparse(ast.fix_missing_locations(tree)))
+
 
 if __name__ == "__main__":
+    
     main()
