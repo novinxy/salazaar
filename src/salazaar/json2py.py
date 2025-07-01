@@ -1,5 +1,4 @@
 import argparse
-from ast import Assign, Constant, Expr, FunctionDef, Load, Module, Store, arguments, Name
 import ast
 import json
 import os
@@ -16,9 +15,9 @@ def parse_variable_declaration(statement):
             name = name.upper()
 
         declarations.append(
-            Assign(
+            ast.Assign(
                 targets=[
-                    Name(id=name, ctx=Store())
+                    ast.Name(id=name, ctx=ast.Store())
                 ],
                 value=parse_statement(d['init'])
             )
@@ -42,7 +41,7 @@ def parse_call_expression(expression):
 
 
 def parse_expression(b):
-    return Expr(
+    return ast.Expr(
         value=parse_statement(b['expression'])
     )
 
@@ -138,7 +137,7 @@ def parse_literal(test_obj):
 
 
 def parse_identifier(obj):
-    return Name(id=obj['name'], ctx=Load())
+    return ast.Name(id=obj['name'], ctx=ast.Load())
 
 
 def parse_unary_expression(obj):
@@ -193,10 +192,10 @@ def parse_statement(b):
 def parse_for_range(obj):
 
     iter = ast.Call(
-        func=Name(id='range', ctx=Load()),
+        func=ast.Name(id='range', ctx=ast.Load()),
         args=[
             ast.Call(
-                func=Name(id='len', ctx=Load()),
+                func=ast.Name(id='len', ctx=ast.Load()),
                 args=[
                     parse_statement(obj['right'])
                 ],
@@ -210,7 +209,7 @@ def parse_for_range(obj):
 
     return ast.For(
         iter=iter,
-        target=Name(id=obj['left']['declarations'][0]['id']['name']),
+        target=ast.Name(id=obj['left']['declarations'][0]['id']['name']),
         body=body,
         orelse=[]
     )
@@ -222,7 +221,7 @@ def parse_for_of(obj):
 
     return ast.For(
         iter=iter,
-        target=Name(id=obj['left']['declarations'][0]['id']['name']),
+        target=ast.Name(id=obj['left']['declarations'][0]['id']['name']),
         body=body,
         orelse=[]
     )
@@ -230,7 +229,7 @@ def parse_for_of(obj):
 
 def parse_array_expression(obj):
     elts = [parse_statement(e) for e in obj['elements']]
-    return ast.List(elts=elts, ctx=Load())
+    return ast.List(elts=elts, ctx=ast.Load())
 
 
 def parse_member_expression(obj):
@@ -242,14 +241,14 @@ def parse_member_expression(obj):
         return ast.Subscript(
             value=_object,
             slice=_property,
-            ctx=Load()
+            ctx=ast.Load()
         )
 
     _property = obj['property']['name']
     return ast.Attribute(
         value=_object,
         attr=_property,
-        ctx=Load()
+        ctx=ast.Load()
     )
 
 
@@ -274,9 +273,9 @@ def parse_function_declaration(statement):
 
     args = [ast.arg(arg=p['name']) for p in statement['params']]
 
-    return FunctionDef(
+    return ast.FunctionDef(
         name=name,
-        args=arguments(
+        args=ast.arguments(
             posonlyargs=[],
             args=args,
             kwonlyargs=[],
@@ -290,7 +289,7 @@ def parse_function_declaration(statement):
 def translate_ast(js_ast: dict):
     body = parse_body(js_ast['body'])
 
-    return Module(
+    return ast.Module(
         body=body,
         type_ignores=[]
     )
