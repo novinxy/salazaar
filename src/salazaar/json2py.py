@@ -1,6 +1,5 @@
 import argparse
 import ast
-import json
 import os
 
 import esprima
@@ -14,12 +13,17 @@ def parse_variable_declaration(statement):
         if statement.get('kind', '') == 'const':
             name = name.upper()
 
+        value = parse_statement(d['init'])
+
         declarations.append(
             ast.Assign(
+                # TODO: There can be multiple targets in a single declaration
+                # For example: const a = 1, b = 2
+                # or a, b = (1, 2)
                 targets=[
                     ast.Name(id=name, ctx=ast.Store())
                 ],
-                value=parse_statement(d['init'])
+                value=value
             )
         )
 
@@ -161,6 +165,7 @@ def parse_object_expr(obj):
 
 
 def parse_statement(b):
+    # TODO: This function returns list[expr] for expr. IT creates many annoying typing issues and bugs. FIX THIS
     if b is None:
         return []
 
@@ -191,7 +196,7 @@ def parse_statement(b):
 
 def parse_for_range(obj):
 
-    iter = ast.Call(
+    iter_elem = ast.Call(
         func=ast.Name(id='range', ctx=ast.Load()),
         args=[
             ast.Call(
@@ -208,19 +213,19 @@ def parse_for_range(obj):
     body = parse_statement(obj['body'])
 
     return ast.For(
-        iter=iter,
+        iter=iter_elem,
         target=ast.Name(id=obj['left']['declarations'][0]['id']['name']),
         body=body,
         orelse=[]
     )
 
 def parse_for_of(obj):
-    iter = parse_statement(obj['right'])
+    iter_elem = parse_statement(obj['right'])
 
     body = parse_statement(obj['body'])
 
     return ast.For(
-        iter=iter,
+        iter=iter_elem,
         target=ast.Name(id=obj['left']['declarations'][0]['id']['name']),
         body=body,
         orelse=[]
@@ -228,26 +233,24 @@ def parse_for_of(obj):
 
 
 def parse_array_expression(obj):
-    elts = [parse_statement(e) for e in obj['elements']]
-    return ast.List(elts=elts, ctx=ast.Load())
+    elements = [parse_statement(e) for e in obj['elements']]
+    return ast.List(elts=elements, ctx=ast.Load())
 
 
 def parse_member_expression(obj):
 
-    _object = parse_statement(obj['object'])
-    _property = parse_statement(obj['property'])
+    value = parse_statement(obj['object'])
 
     if obj['computed']:
         return ast.Subscript(
-            value=_object,
-            slice=_property,
+            value=value,
+            slice=parse_statement(obj['property']),
             ctx=ast.Load()
         )
 
-    _property = obj['property']['name']
     return ast.Attribute(
-        value=_object,
-        attr=_property,
+        value=value,
+        attr=obj['property']['name'],
         ctx=ast.Load()
     )
 
@@ -260,10 +263,11 @@ def parse_body(body_statements):
     statements = []
     for b in body_statements:
         statement = parse_statement(b)
-        if isinstance(statement, list):
-            statements += statement
-        else:
-            statements.append(statement)
+        if not isinstance(statement, list):
+            statement = [statement]
+
+        statements += statement
+
     return statements
 
 
@@ -300,39 +304,35 @@ def get_js_ast(js_code: str) -> dict:
     return data.toDict()
 
 
-def translate_code(js_code: str, export_ast: bool = False) -> str:
+def translate_code(js_code: str) -> str:
     js_ast = get_js_ast(js_code)
 
-    if export_ast:
-        os.makedirs('_out', exist_ok=True)
-        with open('_out/js_tree.json', mode='w+', encoding='utf-8') as tf:
-            json.dump(js_ast, tf, indent=4)
-
     py_ast = translate_ast(js_ast)
-
-    if export_ast:
-        with open('_out/py_tree.py', mode='w+', encoding='utf-8') as tf:
-            tf.write(ast.dump(py_ast, indent=4))
-
     return ast.unparse(ast.fix_missing_locations(py_ast))
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--file', default='temp.js', required=True)
+    parser.add_argument('--input', default='temp.js', required=True)
+    parser.add_argument('--output', default='temp.py', required=True)
     args = parser.parse_args()
 
-    file_name = args.file
-    with open(file_name, 'r', encoding='utf-8', errors='ignore') as f:
+    input_file_name = args.input
+    output_file_name = args.output
+
+    if not os.path.exists(input_file_name):
+        raise FileNotFoundError(f"Input file '{input_file_name}' does not exist.")
+
+    with open(input_file_name, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
 
     js_tree = get_js_ast(content)
     data = translate_ast(js_tree)
-    # print(ast.dump(data, indent=4))
 
     data_str = ast.unparse(ast.fix_missing_locations(data))
 
-    with open(file_name.replace('.js', '.py'), 'w+', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(output_file_name), exist_ok=True)
+    with open(output_file_name, 'w+', encoding='utf-8') as f:
         f.write(data_str)
 
 
