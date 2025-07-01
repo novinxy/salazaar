@@ -1,4 +1,4 @@
-from .json2py import translate_code
+from .salazaar import translate_code
 
 
 __all__ = [

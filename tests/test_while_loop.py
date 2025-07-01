@@ -1,4 +1,4 @@
-import salazaar.json2py as json2py
+import salazaar
 
 
 def test_simple_wile_loop(multiline):
@@ -10,7 +10,7 @@ def test_simple_wile_loop(multiline):
     """
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = """

@@ -1,4 +1,4 @@
-import salazaar.json2py as json2py
+import salazaar
 
 
 def test_declare_decimal():
@@ -6,7 +6,7 @@ def test_declare_decimal():
     js_code = "var number = 10;"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "number = 10"
@@ -18,7 +18,7 @@ def test_declare_float():
     js_code = "var number = 1.5;"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "number = 1.5"
@@ -30,7 +30,7 @@ def test_declare_boolean():
     js_code = "var flag = true;"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "flag = True"
@@ -42,7 +42,7 @@ def test_declare_string():
     js_code = "var text = 'Hello world';"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "text = 'Hello world'"
@@ -54,7 +54,7 @@ def test_declare_simple_list():
     js_code = "var collection = [1, 2, 3];"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "collection = [1, 2, 3]"
@@ -66,7 +66,7 @@ def test_declare_list_of_variables():
     js_code = "var collection = [var1, var2, var3];"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "collection = [var1, var2, var3]"
@@ -78,7 +78,7 @@ def test_declare_objects():
     js_code = "var collection = {'key1': 'value1', 'key2': 'value2'};"
 
     # act
-    result = json2py.translate_code(js_code)
+    result = salazaar.translate_code(js_code)
 
     # assert
     expected_py = "collection = {'key1': 'value1', 'key2': 'value2'}"
