@@ -41,7 +41,7 @@ def test_else(multiline):
         tmp = 20
     """
     assert result == multiline(expected_py)
-    
+
 
 def test_ifelse(multiline):
     # arrange
@@ -64,7 +64,7 @@ def test_ifelse(multiline):
         tmp = 20
     """
     assert result == multiline(expected_py)
-    
+
 
 def test_multiple_elif_plus_else(multiline):
     # arrange
@@ -99,4 +99,3 @@ def test_multiple_elif_plus_else(multiline):
         tmp = 5000
     """
     assert result == multiline(expected_py)
-    

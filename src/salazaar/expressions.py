@@ -3,23 +3,21 @@ import ast
 
 def parse_variable_declaration(statement):
     declarations = []
-    for d in statement['declarations']:
-        name: str = d['id']['name']
+    for d in statement["declarations"]:
+        name: str = d["id"]["name"]
 
-        if statement.get('kind', '') == 'const':
+        if statement.get("kind", "") == "const":
             name = name.upper()
 
-        value = parse_statement(d['init'])
+        value = parse_statement(d["init"])
 
         declarations.append(
             ast.Assign(
                 # TODO: There can be multiple targets in a single declaration
                 # For example: const a = 1, b = 2
                 # or a, b = (1, 2)
-                targets=[
-                    ast.Name(id=name, ctx=ast.Store())
-                ],
-                value=value
+                targets=[ast.Name(id=name, ctx=ast.Store())],
+                value=value,
             )
         )
 
@@ -27,80 +25,58 @@ def parse_variable_declaration(statement):
 
 
 def parse_call_expression(expression):
-    args = [parse_statement(arg) for arg in expression['arguments']]
+    args = [parse_statement(arg) for arg in expression["arguments"]]
 
-    callee = expression['callee']
+    callee = expression["callee"]
 
     func = parse_statement(callee)
 
-    return ast.Call(
-        func=func,
-        args=args,
-        keywords=[]
-    )
+    return ast.Call(func=func, args=args, keywords=[])
 
 
 def parse_expression(b):
-    return ast.Expr(
-        value=parse_statement(b['expression'])
-    )
+    return ast.Expr(value=parse_statement(b["expression"]))
 
 
 def parse_return(b):
-    return ast.Return(
-        parse_statement(b['argument'])
-    )
+    return ast.Return(parse_statement(b["argument"]))
 
 
 def parse_binary_expr(test):
-    ops_map = {
-        "==": ast.Eq(),
-        "!=": ast.NotEq(),
-        ">": ast.Gt(),
-        ">=": ast.GtE(),
-        "<": ast.Lt(),
-        "<=": ast.LtE()
-    }
+    ops_map = {"==": ast.Eq(), "!=": ast.NotEq(), ">": ast.Gt(), ">=": ast.GtE(), "<": ast.Lt(), "<=": ast.LtE()}
 
-    ops = [ops_map[test['operator']]]
+    ops = [ops_map[test["operator"]]]
 
-    left = parse_statement(test['left'])
-    right = parse_statement(test['right'])
+    left = parse_statement(test["left"])
+    right = parse_statement(test["right"])
 
-    return ast.Compare(left=left,
-                       ops=ops,
-                       comparators=[right])
+    return ast.Compare(left=left, ops=ops, comparators=[right])
 
 
 def parse_if(bo):
     orelse = []
-    if alternate := bo.get('alternate'):
+    if alternate := bo.get("alternate"):
         orelse = parse_statement(alternate)
         if not isinstance(orelse, list):
             orelse = [orelse]
 
-    return ast.If(
-        test=parse_statement(bo['test']),
-        body=parse_statement(bo['consequent']),
-        orelse=orelse
-    )
+    return ast.If(test=parse_statement(bo["test"]), body=parse_statement(bo["consequent"]), orelse=orelse)
 
 
 def parse_logical_expression(test_obj):
-    bool_ops = {
-        '&&': ast.And(),
-        '||': ast.Or()
-    }
+    bool_ops = {"&&": ast.And(), "||": ast.Or()}
 
     values = []
 
     def parse_left(obj):
-        if (obj['type'] == 'LogicalExpression'
-            and obj['left']['type'] == 'LogicalExpression'
-                and obj['operator'] == obj['left']['operator']):
+        if (
+            obj["type"] == "LogicalExpression"
+            and obj["left"]["type"] == "LogicalExpression"
+            and obj["operator"] == obj["left"]["operator"]
+        ):
             values1 = []
-            values1 += parse_left(obj['left'])
-            values1.append(parse_statement(obj['right']))
+            values1 += parse_left(obj["left"])
+            values1.append(parse_statement(obj["right"]))
             return values1
 
         # if obj['type'] == 'LogicalExpression':
@@ -111,53 +87,38 @@ def parse_logical_expression(test_obj):
 
         return [parse_statement(obj)]
 
-    values += parse_left(test_obj['left'])
+    values += parse_left(test_obj["left"])
     # values.append(parse_statement(test_obj['left']))
-    values.append(parse_statement(test_obj['right']))
+    values.append(parse_statement(test_obj["right"]))
 
-    return ast.BoolOp(
-        op=bool_ops[test_obj['operator']],
-        values=values
-    )
+    return ast.BoolOp(op=bool_ops[test_obj["operator"]], values=values)
 
 
 def parse_while_loop(b):
-    test_value = parse_statement(b['test'])
-    body = parse_statement(b['body'])
+    test_value = parse_statement(b["test"])
+    body = parse_statement(b["body"])
 
-    return ast.While(
-        test=test_value,
-        body=body,
-        orelse=[]
-    )
+    return ast.While(test=test_value, body=body, orelse=[])
 
 
 def parse_literal(test_obj):
-    return ast.Constant(value=test_obj['value'])
+    return ast.Constant(value=test_obj["value"])
 
 
 def parse_identifier(obj):
-    return ast.Name(id=obj['name'], ctx=ast.Load())
+    return ast.Name(id=obj["name"], ctx=ast.Load())
 
 
 def parse_unary_expression(obj):
-    op = {
-        '-': ast.USub(),
-        '~': ast.Invert(),
-        '!': ast.Not()
-    }[obj['operator']]
+    op = {"-": ast.USub(), "~": ast.Invert(), "!": ast.Not()}[obj["operator"]]
 
-    return ast.UnaryOp(
-        op=op,
-        operand=parse_statement(obj['argument'])
-    )
+    return ast.UnaryOp(op=op, operand=parse_statement(obj["argument"]))
 
 
 def parse_object_expr(obj):
-    keys = [parse_statement(p['key']) for p in obj['properties']]
-    values = [parse_statement(p['value']) for p in obj['properties']]
-    return ast.Dict(keys=keys,
-                    values=values)
+    keys = [parse_statement(p["key"]) for p in obj["properties"]]
+    values = [parse_statement(p["value"]) for p in obj["properties"]]
+    return ast.Dict(keys=keys, values=values)
 
 
 def parse_statement(b):
@@ -166,93 +127,70 @@ def parse_statement(b):
         return []
 
     parser = {
-        'BlockStatement': parse_block_statement,
-        'VariableDeclaration': parse_variable_declaration,
-        'ExpressionStatement': parse_expression,
-        'CallExpression': parse_call_expression,
-        'IfStatement': parse_if,
-        'ReturnStatement': parse_return,
-        'FunctionDeclaration': parse_function_declaration,
-        'WhileStatement': parse_while_loop,
-        'BinaryExpression': parse_binary_expr,
-        'Literal': parse_literal,
-        'Identifier': parse_identifier,
-        'LogicalExpression': parse_logical_expression,
-        'MemberExpression': parse_member_expression,
-        'UnaryExpression': parse_unary_expression,
-        'ArrayExpression': parse_array_expression,
-        'ObjectExpression': parse_object_expr,
+        "BlockStatement": parse_block_statement,
+        "VariableDeclaration": parse_variable_declaration,
+        "ExpressionStatement": parse_expression,
+        "CallExpression": parse_call_expression,
+        "IfStatement": parse_if,
+        "ReturnStatement": parse_return,
+        "FunctionDeclaration": parse_function_declaration,
+        "WhileStatement": parse_while_loop,
+        "BinaryExpression": parse_binary_expr,
+        "Literal": parse_literal,
+        "Identifier": parse_identifier,
+        "LogicalExpression": parse_logical_expression,
+        "MemberExpression": parse_member_expression,
+        "UnaryExpression": parse_unary_expression,
+        "ArrayExpression": parse_array_expression,
+        "ObjectExpression": parse_object_expr,
         #    'FunctionExpression': None,
-        'ForInStatement': parse_for_range,
-        'ForOfStatement': parse_for_of,
-    }[b.get('type')]
+        "ForInStatement": parse_for_range,
+        "ForOfStatement": parse_for_of,
+    }[b.get("type")]
 
     return parser(b)
 
 
 def parse_for_range(obj):
-
     iter_elem = ast.Call(
-        func=ast.Name(id='range', ctx=ast.Load()),
-        args=[
-            ast.Call(
-                func=ast.Name(id='len', ctx=ast.Load()),
-                args=[
-                    parse_statement(obj['right'])
-                ],
-                keywords=[]
-            )
-        ],
-        keywords=[]
+        func=ast.Name(id="range", ctx=ast.Load()),
+        args=[ast.Call(func=ast.Name(id="len", ctx=ast.Load()), args=[parse_statement(obj["right"])], keywords=[])],
+        keywords=[],
     )
 
-    body = parse_statement(obj['body'])
+    body = parse_statement(obj["body"])
 
     return ast.For(
-        iter=iter_elem,
-        target=ast.Name(id=obj['left']['declarations'][0]['id']['name']),
-        body=body,
-        orelse=[]
+        iter=iter_elem, target=ast.Name(id=obj["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[]
     )
+
 
 def parse_for_of(obj):
-    iter_elem = parse_statement(obj['right'])
+    iter_elem = parse_statement(obj["right"])
 
-    body = parse_statement(obj['body'])
+    body = parse_statement(obj["body"])
 
     return ast.For(
-        iter=iter_elem,
-        target=ast.Name(id=obj['left']['declarations'][0]['id']['name']),
-        body=body,
-        orelse=[]
+        iter=iter_elem, target=ast.Name(id=obj["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[]
     )
 
 
 def parse_array_expression(obj):
-    elements = [parse_statement(e) for e in obj['elements']]
+    elements = [parse_statement(e) for e in obj["elements"]]
     return ast.List(elts=elements, ctx=ast.Load())
 
 
 def parse_member_expression(obj):
+    value = parse_statement(obj["object"])
 
-    value = parse_statement(obj['object'])
+    if obj["computed"]:
+        return ast.Subscript(value=value, slice=parse_statement(obj["property"]), ctx=ast.Load())
 
-    if obj['computed']:
-        return ast.Subscript(
-            value=value,
-            slice=parse_statement(obj['property']),
-            ctx=ast.Load()
-        )
-
-    return ast.Attribute(
-        value=value,
-        attr=obj['property']['name'],
-        ctx=ast.Load()
-    )
+    return ast.Attribute(value=value, attr=obj["property"]["name"], ctx=ast.Load())
 
 
 def parse_block_statement(obj):
-    return parse_body(obj['body'])
+    return parse_body(obj["body"])
 
 
 def parse_body(body_statements):
@@ -268,29 +206,20 @@ def parse_body(body_statements):
 
 
 def parse_function_declaration(statement):
-    name = statement['id']['name']
-    body = parse_statement(statement['body'])
+    name = statement["id"]["name"]
+    body = parse_statement(statement["body"])
 
-    args = [ast.arg(arg=p['name']) for p in statement['params']]
+    args = [ast.arg(arg=p["name"]) for p in statement["params"]]
 
     return ast.FunctionDef(
         name=name,
-        args=ast.arguments(
-            posonlyargs=[],
-            args=args,
-            kwonlyargs=[],
-            kw_defaults=[],
-            defaults=[]),
+        args=ast.arguments(posonlyargs=[], args=args, kwonlyargs=[], kw_defaults=[], defaults=[]),
         body=body,
-        decorator_list=[]
+        decorator_list=[],
     )
 
 
 def parse_module(js_ast: dict):
-    body = parse_body(js_ast['body'])
+    body = parse_body(js_ast["body"])
 
-    return ast.Module(
-        body=body,
-        type_ignores=[]
-    )
-
+    return ast.Module(body=body, type_ignores=[])
