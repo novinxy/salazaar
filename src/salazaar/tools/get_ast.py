@@ -1,7 +1,10 @@
 import argparse
 import ast
+import json
 import sys
 from typing import TextIO
+
+import salazaar
 
 
 def main():
@@ -16,6 +19,8 @@ def main():
     )
     group.add_argument("--input", type=str, required=False, help="Input JavaScript code file")
 
+    parser.add_argument("--lang", type=str, choices=["py", "js"], default="js")
+
     args = parser.parse_args()
 
     if args.input:
@@ -24,9 +29,16 @@ def main():
         input: TextIO = args.input_file
 
         code = input.read()
-    tree = ast.parse(code)
-    p = ast.dump(tree, indent=2)
-    print(p)
+
+    if args.lang == "py":
+        tree = ast.parse(code)
+        ast_string = ast.dump(tree, indent=2)
+    else:
+        ast_string = salazaar.salazaar.get_js_ast(code)
+        ast_string = json.dumps(ast_string, indent=2)
+
+    print(ast_string)
+
 
 
 if __name__ == "__main__":
