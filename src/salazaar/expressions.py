@@ -15,10 +15,10 @@ def parse_variable_declaration(statement):
 
         name: str = d["id"]["name"]
 
-        if d["init"]['type'] == "AssignmentExpression":
+        if d["init"]["type"] == "AssignmentExpression":
             pass
             # TODO: implement multiple assignments
-            # value = 
+            # value =
         else:
             value = parse_statement(d["init"])
 
@@ -36,14 +36,10 @@ def parse_variable_declaration(statement):
 
 
 def parse_assignment(statement):
-    targets = parse_statement(statement['left'])
-    value = parse_statement(statement['right'])
-    
-    return ast.Assign(
-        targets=[targets],
-        value=value
-    )
+    targets = parse_statement(statement["left"])
+    value = parse_statement(statement["right"])
 
+    return ast.Assign(targets=[targets], value=value)
 
 
 def parse_call_expression(expression):

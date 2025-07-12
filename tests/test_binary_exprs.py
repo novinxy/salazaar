@@ -1,103 +1,43 @@
-from salazaar import translate_code
+import pytest
+
+from tests.conftest import CodeTranspile, translate_and_compare
 
 
-def test_equality_compare(multiline):
-    # Arrange
-    js_code = """
-    var1 == var2;
-    """
-
-    # Act
-    py_code = translate_code(js_code)
-
-    # Assert
-    expected_py = """
-    var1 == var2
-    """
-
-    assert py_code == multiline(expected_py)
-
-
-def test_not_equal_compare(multiline):
-    # Arrange
-    js_code = """
-    var1 != var2;
-    """
-
-    # Act
-    py_code = translate_code(js_code)
-
-    # Assert
-    expected_py = """
-    var1 != var2
-    """
-
-    assert py_code == multiline(expected_py)
-
-
-def test_greater_compare(multiline):
-    # Arrange
-    js_code = """
-    var1 > var2;
-    """
-
-    # Act
-    py_code = translate_code(js_code)
-
-    # Assert
-    expected_py = """
-    var1 > var2
-    """
-
-    assert py_code == multiline(expected_py)
-
-
-def test_greater_or_equal_compare(multiline):
-    # Arrange
-    js_code = """
-    var1 >= var2;
-    """
-
-    # Act
-    py_code = translate_code(js_code)
-
-    # Assert
-    expected_py = """
-    var1 >= var2
-    """
-
-    assert py_code == multiline(expected_py)
-
-
-def test_less_compare(multiline):
-    # Arrange
-    js_code = """
-    var1 < var2;
-    """
-
-    # Act
-    py_code = translate_code(js_code)
-
-    # Assert
-    expected_py = """
-    var1 < var2
-    """
-
-    assert py_code == multiline(expected_py)
-
-
-def test_less_or_equal_compare(multiline):
-    # Arrange
-    js_code = """
-    var1 <= var2;
-    """
-
-    # Act
-    py_code = translate_code(js_code)
-
-    # Assert
-    expected_py = """
-    var1 <= var2
-    """
-
-    assert py_code == multiline(expected_py)
+@pytest.mark.parametrize(
+    "p",
+    [
+        CodeTranspile(
+            id="equality compare",
+            js="var1 == var2;",
+            py="var1 == var2",
+        ),
+        CodeTranspile(
+            id="not equal compare",
+            js="var1 != var2;",
+            py="var1 != var2",
+        ),
+        CodeTranspile(
+            id="greater compare",
+            js="var1 > var2;",
+            py="var1 > var2",
+        ),
+        CodeTranspile(
+            id="greater or equal compare",
+            js="var1 >= var2;",
+            py="var1 >= var2",
+        ),
+        CodeTranspile(
+            id="less compare",
+            js="var1 < var2;",
+            py="var1 < var2",
+        ),
+        CodeTranspile(
+            id="less or equal compare",
+            js="var1 <= var2;",
+            py="var1 <= var2",
+        ),
+    ],
+    ids=CodeTranspile.get_pytest_id,
+)
+def test_binary_expressions(p: CodeTranspile):
+    translate_and_compare(p.js, p.py)
