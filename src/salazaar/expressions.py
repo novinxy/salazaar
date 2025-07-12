@@ -22,12 +22,23 @@ def parse_variable_declaration(statement):
                 # TODO: There can be multiple targets in a single declaration
                 # For example: const a = 1, b = 2
                 # or a, b = (1, 2)
-                targets=[ast.Name(id=name, ctx=ast.Store())],
+                targets=[ast.Name(id=name)],
                 value=value,
             )
         )
 
     return declarations
+
+
+def parse_assignment(statement):
+    targets = parse_statement(statement['left'])
+    value = parse_statement(statement['right'])
+    
+    return ast.Assign(
+        targets=[targets],
+        value=value
+    )
+
 
 
 def parse_call_expression(expression):
@@ -112,7 +123,7 @@ def parse_literal(test_obj):
 
 
 def parse_identifier(obj):
-    return ast.Name(id=obj["name"], ctx=ast.Load())
+    return ast.Name(id=obj["name"])
 
 
 def parse_unary_expression(obj):
@@ -152,6 +163,7 @@ def parse_statement(b):
         #    'FunctionExpression': None,
         "ForInStatement": parse_for_range,
         "ForOfStatement": parse_for_of,
+        "AssignmentExpression": parse_assignment,
     }[b.get("type")]
 
     return parser(b)
@@ -159,8 +171,8 @@ def parse_statement(b):
 
 def parse_for_range(obj):
     iter_elem = ast.Call(
-        func=ast.Name(id="range", ctx=ast.Load()),
-        args=[ast.Call(func=ast.Name(id="len", ctx=ast.Load()), args=[parse_statement(obj["right"])], keywords=[])],
+        func=ast.Name(id="range"),
+        args=[ast.Call(func=ast.Name(id="len"), args=[parse_statement(obj["right"])], keywords=[])],
         keywords=[],
     )
 
@@ -183,16 +195,16 @@ def parse_for_of(obj):
 
 def parse_array_expression(obj):
     elements = [parse_statement(e) for e in obj["elements"]]
-    return ast.List(elts=elements, ctx=ast.Load())
+    return ast.List(elts=elements)
 
 
 def parse_member_expression(obj):
     value = parse_statement(obj["object"])
 
     if obj["computed"]:
-        return ast.Subscript(value=value, slice=parse_statement(obj["property"]), ctx=ast.Load())
+        return ast.Subscript(value=value, slice=parse_statement(obj["property"]))
 
-    return ast.Attribute(value=value, attr=obj["property"]["name"], ctx=ast.Load())
+    return ast.Attribute(value=value, attr=obj["property"]["name"])
 
 
 def parse_block_statement(obj):

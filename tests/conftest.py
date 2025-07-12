@@ -1,7 +1,7 @@
 from dataclasses import dataclass
-import pytest
-
 from textwrap import dedent
+
+import pytest
 
 
 @pytest.fixture
@@ -19,6 +19,7 @@ class TestCaseParams:
 
     def get_pytest_id(self):
         return self.id
+
 
 @dataclass
 class CodeTranspile(TestCaseParams):

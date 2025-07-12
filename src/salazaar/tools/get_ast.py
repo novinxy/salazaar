@@ -1,6 +1,6 @@
+import argparse
 import ast
 import sys
-import argparse
 from typing import TextIO
 
 

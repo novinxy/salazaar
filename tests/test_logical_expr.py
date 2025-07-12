@@ -1,7 +1,8 @@
 import itertools
-from salazaar import translate_code
+
 import pytest
 
+from salazaar import translate_code
 
 translations = [
     ("var1 == var2 && i == 10;", "var1 == var2 and i == 10"),

@@ -1,7 +1,6 @@
-import salazaar
-
 import pytest
 
+import salazaar
 from tests.conftest import CodeTranspile
 
 
@@ -46,18 +45,22 @@ def test_given_different_javascript_declaration_types_return_same_declaration():
         CodeTranspile(
             js="var [number, flag] = [10, true]",
             py="number, flag = (10, True)",
-            id="multiple declarations",
+            id="multiple - tuple unpack",
         ),
         CodeTranspile(
             js="let x = 20, y = 30, z = 40;",
-            py="x = 10; y = 30; z = 40",
-            id="multiple declarations 2",
+            py="x = 20\ny = 30\nz = 40",
+            id="multiple - split with comma",
         ),
         CodeTranspile(
-            js="""var moveUp, moveDown, moveLeft, moveRight, mouseDown, touchDown;
-moveUp = moveDown = moveLeft = moveRight = mouseDown = touchDown = false;""",
-            py="number, flag = (10, True)",
-            id="multiple declarations 3",
+            js="let x = y = z = 10",
+            py="x = y = z = 10",
+            id="multiple - assignment",
+        ),
+        CodeTranspile(
+            js="flag = true",
+            py="flag = true",
+            id="assignment expression",
         ),
     ],
     ids=CodeTranspile.get_pytest_id,
