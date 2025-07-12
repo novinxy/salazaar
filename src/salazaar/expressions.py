@@ -15,7 +15,12 @@ def parse_variable_declaration(statement):
 
         name: str = d["id"]["name"]
 
-        value = parse_statement(d["init"])
+        if d["init"]['type'] == "AssignmentExpression":
+            pass
+            # TODO: implement multiple assignments
+            # value = 
+        else:
+            value = parse_statement(d["init"])
 
         declarations.append(
             ast.Assign(
