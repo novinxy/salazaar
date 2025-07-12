@@ -62,6 +62,11 @@ def test_given_different_javascript_declaration_types_return_same_declaration():
             py="flag = true",
             id="assignment expression",
         ),
+        CodeTranspile(
+            js="let nothing",
+            py="nothing = None",
+            id="declaration - undefined",
+        ),
     ],
     ids=CodeTranspile.get_pytest_id,
 )
