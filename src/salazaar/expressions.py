@@ -4,10 +4,16 @@ import ast
 def parse_variable_declaration(statement):
     declarations = []
     for d in statement["declarations"]:
-        name: str = d["id"]["name"]
+        if d["id"]["type"] == "ArrayPattern":
+            declarations.append(
+                ast.Assign(
+                    targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in d["id"]["elements"]])],
+                    value=ast.Tuple(elts=[parse_statement(e) for e in d["init"]["elements"]]),
+                )
+            )
+            return declarations
 
-        if statement.get("kind", "") == "const":
-            name = name.upper()
+        name: str = d["id"]["name"]
 
         value = parse_statement(d["init"])
 
