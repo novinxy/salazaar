@@ -165,6 +165,7 @@ def parse_statement(b):
         "ForInStatement": parse_for_range,
         "ForOfStatement": parse_for_of,
         "AssignmentExpression": parse_assignment,
+        'ForStatement': parse_for,
     }[b.get("type")]
 
     return parser(b)
@@ -193,6 +194,19 @@ def parse_for_of(obj):
         iter=iter_elem, target=ast.Name(id=obj["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[]
     )
 
+
+def parse_for(obj):
+    init = parse_statement(obj["init"])
+    test = parse_statement(obj["test"])
+    update = parse_statement(obj["update"])
+    body = parse_statement(obj["body"])
+
+    return ast.For(
+        target=init[0].targets[0],
+        iter=ast.Call(func=ast.Name(id="range"), args=[test], keywords=[]),
+        body=body,
+        orelse=[],
+    )
 
 def parse_array_expression(obj):
     elements = [parse_statement(e) for e in obj["elements"]]
