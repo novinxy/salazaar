@@ -1,47 +1,63 @@
-# Test suite: variable declaration
-
-## Test case: decimal
+## Test case: while loop
 JavaScript:
 ```js
-var number = 10;
+while (true) {
+    var i = 10;
+}
 ```
 
 Python:
 ```py
-number = 10
+while True:
+    i = 10
 ```
 
-## Test case: float
+## Test case: do-while loop
 JavaScript:
 ```js
-var number = 1.5;
+do {
+  i += 1;
+  result += i;
+} while (i < 5);
 ```
 
 Python:
 ```py
-number = 1.5
+i += 1
+result += i
+
+while i < 5:
+  i += 1
+  result += i
+
 ```
 
-## Test case: boolean true
+## Test case: for in
 JavaScript:
 ```js
-var flag = true
+for (const i in collection) {
+    var tmp = collection[i];
+}
 ```
 
 Python:
 ```py
-flag = True
+for i in range(len(collection)):
+    tmp = collection[i]
 ```
 
-## Test case: boolean false
+## Test case: for of
 JavaScript:
 ```js
-var flag = false
+for (const elem of collection) {
+    var tmp = elem;
+}
 ```
 
 Python:
 ```py
-flag = False
+for elem in collection:
+    tmp = elem
 ```
 
 ## Test case: for loop ascending
