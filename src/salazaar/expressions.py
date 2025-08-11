@@ -61,7 +61,7 @@ def parse_return(b):
 
 
 def parse_binary_expr(test):
-    ops_map = {"==": ast.Eq(), "!=": ast.NotEq(), ">": ast.Gt(), ">=": ast.GtE(), "<": ast.Lt(), "<=": ast.LtE()}
+    ops_map = {"==": ast.Eq(), "!=": ast.NotEq(),  "===": ast.Eq(), "!==": ast.NotEq(), ">": ast.Gt(), ">=": ast.GtE(), "<": ast.Lt(), "<=": ast.LtE(),}
 
     ops = [ops_map[test["operator"]]]
 
@@ -139,6 +139,9 @@ def parse_object_expr(obj):
     return ast.Dict(keys=keys, values=values)
 
 
+def update_expression(obj):
+    return ast.Pass()
+
 def parse_statement(b):
     # TODO: This function returns list[expr] for expr. IT creates many annoying typing issues and bugs. FIX THIS
     if b is None:
@@ -166,6 +169,7 @@ def parse_statement(b):
         "ForOfStatement": parse_for_of,
         "AssignmentExpression": parse_assignment,
         'ForStatement': parse_for,
+        'UpdateExpression': update_expression,
     }[b.get("type")]
 
     return parser(b)
