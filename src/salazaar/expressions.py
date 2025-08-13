@@ -14,13 +14,15 @@ def parse_variable_declaration(statement):
             return declarations
 
         name: str = d["id"]["name"]
+        assigned_value = d.get('init', {'raw': 'null', 'type': 'Literal','value': 'null'})
 
-        if d["init"]["type"] == "AssignmentExpression":
+
+        if assigned_value["type"] == "AssignmentExpression":
             pass
             # TODO: implement multiple assignments
             # value =
         else:
-            value = parse_statement(d["init"])
+            value = parse_statement(assigned_value)
 
         declarations.append(
             ast.Assign(
@@ -120,11 +122,19 @@ def parse_while_loop(b):
 
 
 def parse_literal(test_obj):
-    return ast.Constant(value=test_obj["value"])
+    value = test_obj.get('value', None)
+    if value in ('undefined', 'null'):
+        return ast.Constant(value=None)
+
+    return ast.Constant(value=value)
 
 
 def parse_identifier(obj):
-    return ast.Name(id=obj["name"])
+    value = obj['name']
+    if value in ('undefined', 'null'):
+        return ast.Constant(value=None)
+
+    return ast.Name(id=value)
 
 
 def parse_unary_expression(obj):
