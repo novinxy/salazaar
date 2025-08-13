@@ -139,37 +139,32 @@ def parse_object_expr(obj):
     return ast.Dict(keys=keys, values=values)
 
 
-def update_expression(obj):
-    return ast.Pass()
-
 def parse_statement(b):
     # TODO: This function returns list[expr] for expr. IT creates many annoying typing issues and bugs. FIX THIS
     if b is None:
         return []
 
     parser = {
-        "BlockStatement": parse_block_statement,
-        "VariableDeclaration": parse_variable_declaration,
-        "ExpressionStatement": parse_expression,
-        "CallExpression": parse_call_expression,
-        "IfStatement": parse_if,
-        "ReturnStatement": parse_return,
-        "FunctionDeclaration": parse_function_declaration,
-        "WhileStatement": parse_while_loop,
-        "BinaryExpression": parse_binary_expr,
-        "Literal": parse_literal,
-        "Identifier": parse_identifier,
-        "LogicalExpression": parse_logical_expression,
-        "MemberExpression": parse_member_expression,
-        "UnaryExpression": parse_unary_expression,
         "ArrayExpression": parse_array_expression,
-        "ObjectExpression": parse_object_expr,
-        #    'FunctionExpression': None,
+        "AssignmentExpression": parse_assignment,
+        "BinaryExpression": parse_binary_expr,
+        "BlockStatement": parse_block_statement,
+        "CallExpression": parse_call_expression,
+        "ExpressionStatement": parse_expression,
         "ForInStatement": parse_for_range,
         "ForOfStatement": parse_for_of,
-        "AssignmentExpression": parse_assignment,
         'ForStatement': parse_for,
-        'UpdateExpression': update_expression,
+        "FunctionDeclaration": parse_function_declaration,
+        "Identifier": parse_identifier,
+        "IfStatement": parse_if,
+        "Literal": parse_literal,
+        "LogicalExpression": parse_logical_expression,
+        "MemberExpression": parse_member_expression,
+        "ObjectExpression": parse_object_expr,
+        "ReturnStatement": parse_return,
+        "WhileStatement": parse_while_loop,
+        "UnaryExpression": parse_unary_expression,
+        "VariableDeclaration": parse_variable_declaration,
     }[b.get("type")]
 
     return parser(b)
