@@ -39,3 +39,27 @@ Python:
 def Test(arg1, arg2, arg3):
     tmp = 10
 ```
+
+## Test case: function expression to python lambda
+JavaScript:
+```js
+const multiply = function mul(a, b) {
+  return a * b;
+};
+```
+
+Python:
+```py
+multiple = lambda a, b: a * b
+```
+
+## Test case: array function to python lambda
+JavaScript:
+```js
+const squares = numbers.map(num => num * num);
+```
+
+Python:
+```py
+squares = numbers.map(lambda num: num * num)
+```
