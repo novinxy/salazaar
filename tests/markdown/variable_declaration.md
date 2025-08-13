@@ -1,3 +1,36 @@
+## Test case: undefined value
+JavaScript:
+```js
+var number = undefined;
+```
+
+Python:
+```py
+number = None
+```
+
+## Test case: null value
+JavaScript:
+```js
+var number = null;
+```
+
+Python:
+```py
+number = None
+```
+
+## Test case: declare - without initialization
+JavaScript:
+```js
+let nothing
+```
+
+Python:
+```py
+nothing = None
+```
+
 ## Test case: decimal
 JavaScript:
 ```js
@@ -153,15 +186,4 @@ flag = true
 Python:
 ```py
 flag = True
-```
-
-## Test case: declare - undefined
-JavaScript:
-```js
-let nothing
-```
-
-Python:
-```py
-nothing = None
 ```
