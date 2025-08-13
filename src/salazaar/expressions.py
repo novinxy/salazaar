@@ -3,23 +3,23 @@ import ast
 
 def parse_variable_declaration(statement):
     declarations = []
-    for d in statement["declarations"]:
-        if d["id"]["type"] == "ArrayPattern":
+    for declaration in statement["declarations"]:
+        if declaration["id"]["type"] == "ArrayPattern":
             declarations.append(
                 ast.Assign(
-                    targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in d["id"]["elements"]])],
-                    value=ast.Tuple(elts=[parse_statement(e) for e in d["init"]["elements"]]),
+                    targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in declaration["id"]["elements"]])],
+                    value=ast.Tuple(elts=[parse_statement(e) for e in declaration["init"]["elements"]]),
                 )
             )
             return declarations
 
-        name: str = d["id"]["name"]
-        assigned_value = d.get('init', {'raw': 'null', 'type': 'Literal','value': 'null'})
+        name: str = declaration["id"]["name"]
+        assigned_value = declaration.get('init', {'raw': 'null', 'type': 'Literal','value': 'null'})
 
 
         if assigned_value["type"] == "AssignmentExpression":
-            pass
-            # TODO: implement multiple assignments
+
+            value = parse_assignment(assigned_value)
             # value =
         else:
             value = parse_statement(assigned_value)
@@ -38,10 +38,23 @@ def parse_variable_declaration(statement):
 
 
 def parse_assignment(statement):
-    targets = parse_statement(statement["left"])
-    value = parse_statement(statement["right"])
+    targets = []
+    targets.append(parse_identifier(statement["left"]))
 
-    return ast.Assign(targets=[targets], value=value)
+    rhs = statement['right']
+
+    while rhs['type'] == 'AssignmentExpression':
+        targets.append(parse_identifier(rhs['left']))
+
+        rhs = rhs['right']
+
+
+    value = parse_statement(rhs)
+
+    if isinstance(value, list):
+        raise ValueError("Value on the assign shouldn't be list", value)
+
+    return ast.Assign(targets=targets, value=value)
 
 
 def parse_call_expression(expression):
@@ -129,7 +142,7 @@ def parse_literal(test_obj):
     return ast.Constant(value=value)
 
 
-def parse_identifier(obj):
+def parse_identifier(obj) -> ast.expr:
     value = obj['name']
     if value in ('undefined', 'null'):
         return ast.Constant(value=None)
@@ -149,7 +162,7 @@ def parse_object_expr(obj):
     return ast.Dict(keys=keys, values=values)
 
 
-def parse_statement(b):
+def parse_statement(b) -> list[ast.expr] | ast.expr:
     # TODO: This function returns list[expr] for expr. IT creates many annoying typing issues and bugs. FIX THIS
     if b is None:
         return []

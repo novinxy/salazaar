@@ -187,3 +187,14 @@ Python:
 ```py
 flag = True
 ```
+
+## Test case: multi assignment expression in line
+JavaScript:
+```js
+flag = flag1 = flag2
+```
+
+Python:
+```py
+flag = flag1 = flag2
+```
