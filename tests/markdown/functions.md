@@ -63,3 +63,21 @@ Python:
 ```py
 squares = numbers.map(lambda num: num * num)
 ```
+
+## Test case: long array function to python local function
+JavaScript:
+```js
+const squares = numbers.map(num => {
+    const tmp = num * num
+    return tmp;
+});
+```
+
+Python:
+```py
+def function1(num):
+    tmp = num * num
+    return tmp
+
+squares = numbers.map(function1)
+```
