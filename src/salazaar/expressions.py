@@ -17,10 +17,13 @@ def parse_variable_declaration(statement):
         assigned_value = declaration.get('init', {'raw': 'null', 'type': 'Literal','value': 'null'})
 
 
+        targets = [ast.Name(id=name)]
+
         if assigned_value["type"] == "AssignmentExpression":
 
             value = parse_assignment(assigned_value)
-            # value =
+            targets += value.targets
+            value = value.value
         else:
             value = parse_statement(assigned_value)
 
@@ -29,7 +32,7 @@ def parse_variable_declaration(statement):
                 # TODO: There can be multiple targets in a single declaration
                 # For example: const a = 1, b = 2
                 # or a, b = (1, 2)
-                targets=[ast.Name(id=name)],
+                targets=targets,
                 value=value,
             )
         )
