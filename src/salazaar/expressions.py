@@ -122,7 +122,7 @@ def parse_while_loop(b):
 
 
 def parse_literal(test_obj):
-    value = test_obj.get('value', None)
+    value = test_obj.get('value', 'null')
     if value in ('undefined', 'null'):
         return ast.Constant(value=None)
 
