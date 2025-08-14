@@ -31,6 +31,24 @@ Python:
 nothing = None
 ```
 
+
+## Test case: const and let and var are returned to same declaration type
+JavaScript:
+```js
+var num1 = 10;
+let num2 = 50;
+const text = 'tmp';
+```
+
+Python
+```py
+num1 = 10
+num2 = 50
+text = 'tmp'
+
+```
+
+
 ## Test case: decimal
 JavaScript:
 ```js
@@ -130,7 +148,7 @@ Python:
 collection = [{'key1': '1st', 'key2': 2}, {'key3': True, 'key4': [1, 2, 3]}]
 ```
 
-## Test case: multiple - tuple unpack
+## Test case: multiple declarations unpacked as tuple
 JavaScript:
 ```js
 var [number, flag] = [10, true]
@@ -141,7 +159,7 @@ Python:
 number, flag = (10, True)
 ```
 
-## Test case: multiple - split with comma
+## Test case: multiple declarations split with comma
 JavaScript:
 ```js
 let x = 20, y = 30, z = 40;
@@ -154,7 +172,7 @@ y = 30
 z = 40
 ```
 
-## Test case: multiple - assignment
+## Test case: multiple declarations with assignment
 JavaScript:
 ```js
 let x = y = z = 10
@@ -165,7 +183,18 @@ Python:
 x = y = z = 10
 ```
 
-## Test case: multiple - declaration then assignment
+## Test case: mix of multiple declarations unpacked as tuple with assignments
+JavaScript:
+```js
+let [x, y] = t = z = [10, 'hello']
+```
+
+Python:
+```py
+x, y = t = z = (10, 'hello')
+```
+
+## Test case: multiple declarations then multi assignment
 JavaScript:
 ```js
 let x = y = z;

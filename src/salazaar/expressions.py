@@ -5,22 +5,26 @@ def parse_variable_declaration(statement):
     declarations = []
     for declaration in statement["declarations"]:
         if declaration["id"]["type"] == "ArrayPattern":
+            # if declaration['init']['type'] == 'ArrayPattern':
             declarations.append(
                 ast.Assign(
                     targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in declaration["id"]["elements"]])],
                     value=ast.Tuple(elts=[parse_statement(e) for e in declaration["init"]["elements"]]),
                 )
             )
+            # declarations.append(
+            #     ast.Assign(
+            #         targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in declaration["id"]["elements"]])],
+            #         value=ast.Tuple(elts=[parse_statement(declaration['init'])]),
+            #     )
+            # )
+
             return declarations
 
-        name: str = declaration["id"]["name"]
+        targets = [ast.Name(id=declaration["id"]["name"])]
         assigned_value = declaration.get('init', {'raw': 'null', 'type': 'Literal','value': 'null'})
 
-
-        targets = [ast.Name(id=name)]
-
         if assigned_value["type"] == "AssignmentExpression":
-
             value = parse_assignment(assigned_value)
             targets += value.targets
             value = value.value
@@ -29,9 +33,6 @@ def parse_variable_declaration(statement):
 
         declarations.append(
             ast.Assign(
-                # TODO: There can be multiple targets in a single declaration
-                # For example: const a = 1, b = 2
-                # or a, b = (1, 2)
                 targets=targets,
                 value=value,
             )
