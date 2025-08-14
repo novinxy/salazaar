@@ -4,7 +4,7 @@ import os
 
 import esprima
 
-from salazaar import expressions
+from salazaar.ast_converter import ASTConverter
 
 
 def get_js_ast(js_code: str) -> dict:
@@ -15,7 +15,7 @@ def get_js_ast(js_code: str) -> dict:
 def translate_code(js_code: str) -> str:
     js_ast = get_js_ast(js_code)
 
-    py_ast = expressions.parse_module(js_ast)
+    py_ast = ASTConverter().visit(js_ast)
     return ast.unparse(ast.fix_missing_locations(py_ast))
 
 

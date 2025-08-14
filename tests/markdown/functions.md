@@ -111,3 +111,6 @@ def local_anonymous_func(x, y):
 
 squares = numbers.map(local_anonymous_func)
 ```
+
+
+todo: add missing test with return statment for normal function

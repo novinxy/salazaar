@@ -87,3 +87,6 @@ Python:
 for index in range(len(array) - 1, -1, -1):
     element = array[index]
 ```
+
+
+todo: add test for missing tests for returns, breaks and continue
