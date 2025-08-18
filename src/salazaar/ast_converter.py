@@ -1,5 +1,51 @@
 from typing import Any
-from ast import And, Assign, Attribute, BoolOp, Call, Compare, Constant, Dict, Eq, Expr, For, FunctionDef, Gt, GtE, If, Invert, List, Lt, LtE, Module, Name, Not, NotEq, Or, Return, Subscript, Tuple, USub, UnaryOp, While, arg, arguments, expr
+from ast import (
+    Add,
+    And,
+    Assign,
+    Attribute,
+    BinOp,
+    BitAnd,
+    BitOr,
+    BitXor,
+    BoolOp,
+    Call,
+    Compare,
+    Constant,
+    Dict,
+    Div,
+    Eq,
+    Expr,
+    For,
+    FunctionDef,
+    Gt,
+    GtE,
+    If,
+    Invert,
+    LShift,
+    List,
+    Lt,
+    LtE,
+    Mod,
+    Module,
+    Mult,
+    Name,
+    Not,
+    NotEq,
+    Or,
+    Pow,
+    RShift,
+    Return,
+    Sub,
+    Subscript,
+    Tuple,
+    USub,
+    UnaryOp,
+    While,
+    arg,
+    arguments,
+    expr,
+)
 
 
 class ASTConverter:
@@ -83,7 +129,7 @@ class ASTConverter:
         return Expr(value=self.visit(node["expression"]))
 
     def visit_BinaryExpression(self, node: dict):
-        operations = {
+        compareOperators = {
             "==": Eq(),
             "!=": NotEq(),
             "===": Eq(),
@@ -93,13 +139,45 @@ class ASTConverter:
             "<": Lt(),
             "<=": LtE(),
         }
+        mathOperators = {
+            "+": Add(),
+            "-": Sub(),
+            "*": Mult(),
+            "/": Div(),
+            "%": Mod(),
+            "**": Pow(),
+            "<<": LShift(),
+            ">>": RShift(),
+            "|": BitOr(),
+            "^": BitXor(),
+            "&": BitAnd(),
+        }
 
-        ops = [operations[node["operator"]]]
+        operator = node["operator"]
 
-        left = self.visit(node["left"])
-        right = self.visit(node["right"])
+        if operator in compareOperators:
+            ops = [compareOperators[operator]]
 
-        return Compare(left=left, ops=ops, comparators=[right])
+            # TODO GRNO 2025-08-17 : seems that all kind of operators needs to be implemented in here
+            # in esprima all kind of operators are categorized as BinaryExpression
+            # in python it's different, we should probably divert this with compare, arithmetic, etc. operators
+
+            left = self.visit(node["left"])
+            right = self.visit(node["right"])
+
+            return Compare(left=left, ops=ops, comparators=[right])
+
+        if operator in mathOperators:
+            op = mathOperators[operator]
+
+            # TODO GRNO 2025-08-17 : seems that all kind of operators needs to be implemented in here
+            # in esprima all kind of operators are categorized as BinaryExpression
+            # in python it's different, we should probably divert this with compare, arithmetic, etc. operators
+
+            left = self.visit(node["left"])
+            right = self.visit(node["right"])
+
+            return BinOp(left=left, op=op, right=right)
 
     def visit_CallExpression(self, node: dict):
         args = [self.visit(arg) for arg in node["arguments"]]
@@ -120,12 +198,12 @@ class ASTConverter:
         # TODO GRNO 2025-08-14 : are we sure about this line ?
         targets.append(self.visit_Identifier(node["left"]))
 
-        rhs = node['right']
+        rhs = node["right"]
 
-        while rhs['type'] == 'AssignmentExpression':
-            targets.append(self.visit_Identifier(rhs['left']))
+        while rhs["type"] == "AssignmentExpression":
+            targets.append(self.visit_Identifier(rhs["left"]))
 
-            rhs = rhs['right']
+            rhs = rhs["right"]
 
         value = self.visit(rhs)
 
@@ -212,9 +290,7 @@ class ASTConverter:
 
         body = self.visit(node["body"])
 
-        return For(
-            iter=iter_elem, target=Name(id=node["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[]
-        )
+        return For(iter=iter_elem, target=Name(id=node["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[])
 
     def visit_ForStatement(self, node: dict):
         init = self.visit(node["init"])
@@ -235,7 +311,7 @@ class ASTConverter:
 
         return UnaryOp(op=operator, operand=self.visit(node["argument"]))
 
-    def visit_ArrayExpression(self, node:dict):
+    def visit_ArrayExpression(self, node: dict):
         elements = [self.visit(e) for e in node["elements"]]
         return List(elts=elements)
 
@@ -252,9 +328,7 @@ class ASTConverter:
 
         body = self.visit(node["body"])
 
-        return For(
-            iter=iter_elem, target=Name(id=node["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[]
-        )
+        return For(iter=iter_elem, target=Name(id=node["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[])
 
     def visit_WhileStatement(self, node: dict):
         test_value = self.visit(node["test"])
