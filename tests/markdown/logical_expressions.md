@@ -20,6 +20,16 @@ Python:
 var1 == var2 or i == 10
 ```
 
+## Test case: negation
+```js
+!temp;
+```
+
+Python:
+```py
+not temp
+```
+
 ## Test case: and then or expression
 JavaScript:
 ```js
