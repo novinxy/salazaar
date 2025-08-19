@@ -25,7 +25,6 @@ Python:
 ```py
 i += 1
 result += i
-
 while i < 5:
   i += 1
   result += i

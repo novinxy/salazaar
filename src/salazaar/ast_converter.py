@@ -151,7 +151,7 @@ class ASTConverter:
         return Name(id=value)
 
     def visit_ExpressionStatement(self, node: dict):
-        return Expr(value=self.visit(node["expression"]))
+        return self.visit(node["expression"])
 
     def visit_BinaryExpression(self, node: dict):
         operators_mapping: dict[str, Any] = {
@@ -389,6 +389,16 @@ class ASTConverter:
         body = self.visit(node["body"])
 
         return While(test=test_value, body=body, orelse=[])
+
+    def visit_DoWhileStatement(self, node: dict):
+        test_value = self.visit(node["test"])
+        body = self.visit(node["body"])
+
+        return [
+            body,
+            While(test=test_value, body=body, orelse=[])
+        ]
+
 
     def visit_ReturnStatement(self, node: dict):
         return Return(self.visit(node["argument"]))

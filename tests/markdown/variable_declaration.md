@@ -204,7 +204,6 @@ x = y = z = 10;
 Python:
 ```py
 x = y = z
-
 x = y = z = 10
 ```
 
