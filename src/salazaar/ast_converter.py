@@ -390,5 +390,5 @@ class ASTConverter:
 
         return While(test=test_value, body=body, orelse=[])
 
-    # def visit_ReturnStatement(self, node: dict):
-    #     return Return(self.visit(node["argument"]))
+    def visit_ReturnStatement(self, node: dict):
+        return Return(self.visit(node["argument"]))

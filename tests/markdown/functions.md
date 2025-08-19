@@ -12,6 +12,20 @@ def Test():
     tmp = 10
 ```
 
+## Test case: simple function with return
+JavaScript:
+```js
+function Test() {
+    return 10;
+}
+```
+
+Python:
+```py
+def Test():
+    return 10
+```
+
 ## Test case: function with argument
 JavaScript:
 ```js
