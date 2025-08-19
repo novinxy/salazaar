@@ -1,4 +1,3 @@
-from operator import mul
 from typing import Any
 from ast import (
     Add,
