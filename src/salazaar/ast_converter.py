@@ -4,6 +4,7 @@ from ast import (
     And,
     Assign,
     Attribute,
+    AugAssign,
     BinOp,
     BitAnd,
     BitOr,
@@ -71,6 +72,24 @@ class ASTConverter:
                 body += [n]
 
         return Module(body=body, type_ignores=[])
+
+    def visit_UpdateExpression(self, node: dict):
+        operator = node['operator']
+        match operator:
+            case '++':
+                return AugAssign(
+                    target=self.visit(node['argument']),
+                    op=Add(),
+                    value=Constant(value=1)
+                )
+            case '--':
+                return AugAssign(
+                    target=self.visit(node['argument']),
+                    op=Sub(),
+                    value=Constant(value=1)
+                )
+            case _:
+                raise ValueError(f'Incorrect operator {operator}')
 
     def visit_VariableDeclaration(self, node: dict) -> Assign:
         declarations = []
