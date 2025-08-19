@@ -129,7 +129,7 @@ class ASTConverter:
         return Expr(value=self.visit(node["expression"]))
 
     def visit_BinaryExpression(self, node: dict):
-        compareOperators = {
+        operators_mapping: dict[str, Any] = {
             "==": Eq(),
             "!=": NotEq(),
             "===": Eq(),
@@ -138,8 +138,6 @@ class ASTConverter:
             ">=": GtE(),
             "<": Lt(),
             "<=": LtE(),
-        }
-        mathOperators = {
             "+": Add(),
             "-": Sub(),
             "*": Mult(),
@@ -154,30 +152,36 @@ class ASTConverter:
         }
 
         operator = node["operator"]
+        left = self.visit(node["left"])
+        right = self.visit(node["right"])
 
-        if operator in compareOperators:
-            ops = [compareOperators[operator]]
-
-            # TODO GRNO 2025-08-17 : seems that all kind of operators needs to be implemented in here
-            # in esprima all kind of operators are categorized as BinaryExpression
-            # in python it's different, we should probably divert this with compare, arithmetic, etc. operators
-
-            left = self.visit(node["left"])
-            right = self.visit(node["right"])
-
-            return Compare(left=left, ops=ops, comparators=[right])
-
-        if operator in mathOperators:
-            op = mathOperators[operator]
-
-            # TODO GRNO 2025-08-17 : seems that all kind of operators needs to be implemented in here
-            # in esprima all kind of operators are categorized as BinaryExpression
-            # in python it's different, we should probably divert this with compare, arithmetic, etc. operators
-
-            left = self.visit(node["left"])
-            right = self.visit(node["right"])
-
-            return BinOp(left=left, op=op, right=right)
+        match operator:
+            case "==" | "!=" | "===" | "!==" | ">" | ">=" | "<" | "<=":
+                return Compare(
+                    left=left,
+                    ops=[operators_mapping[operator]],
+                    comparators=[right]
+                )
+            case "+" | "-" | "*" | "/" | "%" | "**" | "<<" | ">>" | "|" | "^" | "&":
+                return BinOp(
+                    op=operators_mapping[operator],
+                    left=left,
+                    right=right
+                )
+            case 'in':
+                return Call(
+                    func=Name('hasattr'),
+                    args=[right, left],
+                    keywords=[]
+                )
+            case 'instanceof':
+                return Call(
+                    func=Name('isinstance'),
+                    args=[left, right],
+                    keywords=[]
+                )
+            case _:
+                raise ValueError(f'Incorrect operator: {operator}')
 
     def visit_CallExpression(self, node: dict):
         args = [self.visit(arg) for arg in node["arguments"]]
