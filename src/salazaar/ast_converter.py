@@ -61,12 +61,18 @@ class ASTConverter:
 
         return visitor(node)
 
+    def visit_EmptyStatement(self, _: dict):
+        return None
+
     def visit_Program(self, node: dict) -> Module:
         nodes = [self.visit(n) for n in node["body"]]
         body = []
 
         # TODO GRNO 2025-08-14 : do something about this shit!!! Use the same as parse_body
         for n in nodes:
+            if n is None:
+                continue
+
             if isinstance(n, list):
                 body += n
             else:
