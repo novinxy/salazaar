@@ -22,6 +22,7 @@ from ast import (
     Gt,
     GtE,
     If,
+    IfExp,
     Invert,
     LShift,
     List,
@@ -402,3 +403,21 @@ class ASTConverter:
 
     def visit_ReturnStatement(self, node: dict):
         return Return(self.visit(node["argument"]))
+
+
+    def visit_ConditionalExpression(self, node: dict):
+
+        # IfExp(
+        #     test=Compare(
+        #     left=Name(id='flag', ctx=Load()),
+        #     ops=[
+        #         Eq()],
+        #     comparators=[
+        #         Name(id='true', ctx=Load())]),
+        # body=Constant(value=10),
+        # orelse=Constant(value=0)))])
+        return IfExp(
+            test=self.visit(node['test']),
+            body=self.visit(node['consequent']),
+            orelse=self.visit(node['alternate']),
+        )
