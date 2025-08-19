@@ -1,3 +1,4 @@
+from operator import mul
 from typing import Any
 from ast import (
     Add,
@@ -223,17 +224,42 @@ class ASTConverter:
 
         rhs = node["right"]
 
-        while rhs["type"] == "AssignmentExpression":
-            targets.append(self.visit_Identifier(rhs["left"]))
+        operator = node['operator']
 
-            rhs = rhs["right"]
+        if operator == '=':
+            # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
+            while rhs["type"] == "AssignmentExpression":
+                targets.append(self.visit_Identifier(rhs["left"]))
 
-        value = self.visit(rhs)
+                rhs = rhs["right"]
 
-        if isinstance(value, list):
-            raise ValueError("Value on the assign shouldn't be list", value)
+            value = self.visit(rhs)
 
-        return Assign(targets=targets, value=value)
+            if isinstance(value, list):
+                raise ValueError("Value on the assign shouldn't be list", value)
+
+            return Assign(targets=targets, value=value)
+
+        operators = {
+            '+=': Add(),
+            '-=': Sub(),
+            '*=': Mult(),
+            '/=': Div(),
+            '%=': Mod(),
+            '<<=': LShift(),
+            '>>=': RShift(),
+            '|=': BitOr(),
+            '^=': BitXor(),
+            '&=': BitAnd()
+        }
+
+        op = operators[operator]
+        return AugAssign(
+            target=self.visit(node['left']),
+            op=op,
+            value=self.visit(node['right'])
+        )
+
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
