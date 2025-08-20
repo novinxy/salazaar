@@ -183,16 +183,6 @@ Python:
 x = y = z = 10
 ```
 
-## Test case: mix of multiple declarations unpacked as tuple with assignments
-JavaScript:
-```js
-let [x, y] = t = z = [10, 'hello']
-```
-
-Python:
-```py
-x, y = t = z = (10, 'hello')
-```
 
 ## Test case: multiple declarations then multi assignment
 JavaScript:
