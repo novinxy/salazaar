@@ -356,14 +356,38 @@ class ASTConverter:
 
     def visit_ForStatement(self, node: dict):
         init = self.visit(node["init"])
+        # test is wrongly defined we should convert comparision like <, > to corresponging range logic
         test = self.visit(node["test"])
         # TODO GRNO 2025-08-14 : missing functionality for updating loops
         update = self.visit(node["update"])
         body = self.visit(node["body"])
 
+# For(
+#       target=Name(id='index', ctx=Store()),
+#       iter=Call(
+#         func=Name(id='range', ctx=Load()),
+#         args=[
+#           Call(
+#             func=Name(id='len', ctx=Load()),
+#             args=[
+#               Name(id='array', ctx=Load())])]),
+#       body=[
+#         Assign(
+#           targets=[
+#             Name(id='element', ctx=Store())],
+#           value=Subscript(
+#             value=Name(id='array', ctx=Load()),
+#             slice=Name(id='index', ctx=Load()),
+#             ctx=Load()))])])
+
+
         return For(
             target=init[0].targets[0],
-            iter=Call(func=Name(id="range"), args=[test], keywords=[]),
+            iter=Call(
+                func=Name(id="range"),
+                    args=[test],
+                    keywords=[]
+                ),
             body=body,
             orelse=[],
         )
