@@ -420,25 +420,28 @@ class ASTConverter:
         )
 
     def visit_FunctionExpression(self, node: dict):
-
-        body = node['body']['body']
-        if len(body) > 1:
-            return FunctionDef(
-                name=node['id'],
+        body = node['body']['body'][0]
+        if body['type'] == 'ReturnStatement':
+            return Lambda(
+                args=arguments(args=[arg(p['name']) for p in node['params']]),
+                body=self.visit(body['argument'])
+            )
+        else:
+            return Lambda(
                 args=arguments(args=[arg(p['name']) for p in node['params']]),
                 body=self.visit(body)
             )
 
-        else:
-            body = body[0]
-            if body['type'] == 'ReturnStatement':
+    def visit_ArrowFunctionExpression(self, node: dict):
+        body = node['body']
+        if body['type'] == 'ReturnStatement':
 
-                return Lambda(
-                    args=arguments(args=[arg(p['name']) for p in node['params']]),
-                    body=self.visit(body['argument'])
-                )
-            else:
-                return Lambda(
-                    args=arguments(args=[arg(p['name']) for p in node['params']]),
-                    body=self.visit(body)
-                )
+            return Lambda(
+                args=arguments(args=[arg(p['name']) for p in node['params']]),
+                body=self.visit(body['argument'])
+            )
+        else:
+            return Lambda(
+                args=arguments(args=[arg(p['name']) for p in node['params']]),
+                body=self.visit(body)
+            )
