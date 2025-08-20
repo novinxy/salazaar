@@ -64,7 +64,7 @@ const multiply = function mul(a, b) {
 
 Python:
 ```py
-multiple = lambda a, b: a * b
+multiply = lambda a, b: a * b
 ```
 
 ## Test case: array function to python lambda

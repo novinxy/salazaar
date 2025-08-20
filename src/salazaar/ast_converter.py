@@ -25,6 +25,7 @@ from ast import (
     IfExp,
     Invert,
     LShift,
+    Lambda,
     List,
     Lt,
     LtE,
@@ -406,18 +407,18 @@ class ASTConverter:
 
 
     def visit_ConditionalExpression(self, node: dict):
-
-        # IfExp(
-        #     test=Compare(
-        #     left=Name(id='flag', ctx=Load()),
-        #     ops=[
-        #         Eq()],
-        #     comparators=[
-        #         Name(id='true', ctx=Load())]),
-        # body=Constant(value=10),
-        # orelse=Constant(value=0)))])
         return IfExp(
             test=self.visit(node['test']),
             body=self.visit(node['consequent']),
             orelse=self.visit(node['alternate']),
         )
+
+    def visit_FunctionExpression(self, node: dict):
+
+        body = node['body']['body'][0]
+        if body['type'] == 'ReturnStatement':
+
+            return Lambda(
+                args=arguments(args=[arg(p['name']) for p in node['params']]),
+                body=self.visit(body['argument'])
+            )
