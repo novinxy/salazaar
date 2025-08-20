@@ -12,6 +12,22 @@ def Test():
     tmp = 10
 ```
 
+## Test case: function with multiple lines
+JavaScript:
+```js
+function Test() {
+    var tmp = 10;
+    tmp += 1
+}
+```
+
+Python:
+```py
+def Test():
+    tmp = 10
+    tmp += 1
+```
+
 ## Test case: simple function with return
 JavaScript:
 ```js
@@ -54,6 +70,20 @@ def Test(arg1, arg2, arg3):
     tmp = 10
 ```
 
+## Test case: function expression without arguments to python lambda
+JavaScript:
+```js
+const hello = function () {
+  return console.log("Hello world");
+};
+```
+
+Python:
+```py
+hello = lambda: console.log('Hello world')
+```
+
+
 ## Test case: function expression to python lambda
 JavaScript:
 ```js
@@ -67,7 +97,18 @@ Python:
 multiply = lambda a, b: a * b
 ```
 
-## Test case: array function to python lambda
+## Test case: function expression in one line to python lambda
+JavaScript:
+```js
+const multiply = function mul(a, b) { return a * b; };
+```
+
+Python:
+```py
+multiply = lambda a, b: a * b
+```
+
+## Test case: arrow function to python lambda
 JavaScript:
 ```js
 const squares = numbers.map(num => num * num);
@@ -78,7 +119,7 @@ Python:
 squares = numbers.map(lambda num: num * num)
 ```
 
-## Test case: long array function to python local function
+## Test case: long arrow function to python local function
 JavaScript:
 ```js
 const squares = numbers.map(num => {
