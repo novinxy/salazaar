@@ -47,6 +47,24 @@ Python:
 result = collection.map(lambda a: a * a)
 ```
 
+## Test case: multi line function expression in function call
+JavaScript:
+```js
+const result = collection.map(function calc(a) {
+  a += 5;
+  return a * a;
+});
+```
+
+Python:
+```py
+def calc(a):
+    a += 5
+    return a * a
+
+result = collection.map(calc)
+```
+
 ## Test case: function expression multi line to python lambda
 JavaScript:
 ```js
