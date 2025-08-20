@@ -36,6 +36,17 @@ Python:
 multiply = lambda a, b: a * b
 ```
 
+## Test case: function expression in function call
+JavaScript:
+```js
+const result = collection.map(function power(a) { return a * a; });
+```
+
+Python:
+```py
+result = collection.map(lambda a: a * a)
+```
+
 ## Test case: function expression multi line to python lambda
 JavaScript:
 ```js
