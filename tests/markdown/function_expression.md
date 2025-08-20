@@ -2,7 +2,7 @@
 JavaScript:
 ```js
 const hello = function () {
-  return console.log("Hello world");
+  console.log("Hello world");
 };
 ```
 
@@ -34,4 +34,21 @@ const multiply = function mul(a, b) { return a * b; };
 Python:
 ```py
 multiply = lambda a, b: a * b
+```
+
+## Test case: function expression multi line to python lambda
+JavaScript:
+```js
+const multiply = function (a, b)
+{
+  a++
+  return a * b;
+};
+```
+
+Python:
+```py
+def multiply(a, b):
+    a += 1
+    return a * b
 ```

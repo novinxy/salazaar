@@ -99,7 +99,7 @@ class ASTConverter:
             case _:
                 raise ValueError(f'Incorrect operator {operator}')
 
-    def visit_VariableDeclaration(self, node: dict) -> Assign:
+    def visit_VariableDeclaration(self, node: dict):
         declarations = []
         for declaration in node["declarations"]:
             if declaration["id"]["type"] == "ArrayPattern":
@@ -126,6 +126,12 @@ class ASTConverter:
                 value = self.visit(assigned_value)
                 targets += value.targets
                 value = value.value
+            elif assigned_value['type'] == 'FunctionExpression' and len(assigned_value['body']['body']) > 1:
+                return FunctionDef(
+                    name=declaration["id"]["name"],
+                    args=arguments(args=[arg(p['name']) for p in assigned_value['params']]),
+                    body=self.visit(assigned_value['body'])
+                )
             else:
                 value = self.visit(assigned_value)
 
@@ -415,10 +421,24 @@ class ASTConverter:
 
     def visit_FunctionExpression(self, node: dict):
 
-        body = node['body']['body'][0]
-        if body['type'] == 'ReturnStatement':
-
-            return Lambda(
+        body = node['body']['body']
+        if len(body) > 1:
+            return FunctionDef(
+                name=node['id'],
                 args=arguments(args=[arg(p['name']) for p in node['params']]),
-                body=self.visit(body['argument'])
+                body=self.visit(body)
             )
+
+        else:
+            body = body[0]
+            if body['type'] == 'ReturnStatement':
+
+                return Lambda(
+                    args=arguments(args=[arg(p['name']) for p in node['params']]),
+                    body=self.visit(body['argument'])
+                )
+            else:
+                return Lambda(
+                    args=arguments(args=[arg(p['name']) for p in node['params']]),
+                    body=self.visit(body)
+                )
