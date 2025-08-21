@@ -1,6 +1,6 @@
-### TestCase: Basic try-catch
+## Test case: Basic try-catch
 
-JavaScript
+JavaScript:
 ```js
 try {
     let x = 1 / 0;
@@ -10,7 +10,7 @@ try {
 ```
 
 Python
-```python
+```py
 try:
     x = 1 / 0
 except Exception as e:
@@ -19,7 +19,7 @@ except Exception as e:
 
 ---
 
-### TestCase: try-catch-finally
+## Test case: try-catch-finally
 
 JavaScript
 ```js
@@ -33,7 +33,7 @@ try {
 ```
 
 Python
-```python
+```py
 try:
     do_something()
 except Exception as err:
@@ -44,7 +44,7 @@ finally:
 
 ---
 
-### TestCase: Catching specific error
+## Test case: Catching specific error
 
 JavaScript
 ```js
@@ -58,7 +58,7 @@ try {
 ```
 
 Python
-```python
+```py
 try:
     json.loads('invalid')
 except json.JSONDecodeError:
@@ -67,7 +67,7 @@ except json.JSONDecodeError:
 
 ---
 
-### TestCase: Nested try-catch
+## Test case: Nested try-catch
 
 JavaScript
 ```js
@@ -83,7 +83,7 @@ try {
 ```
 
 Python
-```python
+```py
 try:
     try:
         risky()
@@ -95,7 +95,7 @@ except Exception as outer:
 
 ---
 
-### TestCase: Rethrowing error
+## Test case: Rethrowing error
 
 JavaScript
 ```js
@@ -107,7 +107,7 @@ try {
 ```
 
 Python
-```python
+```py
 try:
     do_something()
 except Exception as e:
