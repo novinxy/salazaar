@@ -137,5 +137,5 @@ match type:
             case _:
                 result = 'A-other'
     case _:
-            result = 'other'
+        result = 'other'
 ```
