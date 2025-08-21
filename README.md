@@ -15,9 +15,11 @@
 ---
 
 ## How it works
-Salazaar works by reading JavaScript AST and converting it to valid Python AST.
+Salazaar works by converting JavaScript AST to valid Python AST.
 
 It uses [esprima-python](https://github.com/PiotrDabkowski/pyjsparser) as JavaScript AST reader.
+
+What Salazaar implements are rules for converting AST, many of which are opinionated. Those languages differ and many features needs to be replaces with something "sensible" in other language.
 
 ---
 
