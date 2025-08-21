@@ -182,31 +182,6 @@ result = -a
 ```
 
 
-## Test case: Floor Division
-
-JavaScript:
-```js
-let result = Math.floor(a / b);
-```
-
-Python:
-```py
-result = a // b
-```
-
-
-## Test case: Absolute Value
-
-JavaScript:
-```js
-let result = Math.abs(a);
-```
-
-Python:
-```py
-result = abs(a)
-```
-
 ## Test case: Left Shift
 
 JavaScript:
