@@ -17,6 +17,7 @@ from ast import (
     Dict,
     Div,
     Eq,
+    ExceptHandler,
     Expr,
     For,
     FunctionDef,
@@ -40,9 +41,11 @@ from ast import (
     Or,
     Pow,
     RShift,
+    Raise,
     Return,
     Sub,
     Subscript,
+    Try,
     Tuple,
     USub,
     UnaryOp,
@@ -495,4 +498,34 @@ class ASTConverter:
         return match_case(
             pattern=pattern,
             body=[self.visit(c) for c in node['consequent']]
+        )
+
+    def visit_TryStatement(self, node: dict):
+        # somehow bodies in here work strange as they are missing Expression for CallExpressions
+        # it's not needed in other places and is safer that way
+        # I'm thinking if maybe we should write special method for it and wrap calls
+
+        result = Try(
+            body=self.visit(node['block']),
+            handlers=[self.visit(node['handler'])],
+        )
+
+        if 'finalizer' in node:
+            result.finalbody = self.visit(node['finalizer'])
+
+        return result
+
+    def visit_CatchClause(self, node: dict):
+        # somehow bodies in here work strange as they are missing Expression for CallExpressions
+        # it's not needed in other places and is safer that way
+        # I'm thinking if maybe we should write special method for it and wrap calls
+        return ExceptHandler(
+            type=Name(id='Exception'),
+            name=node['param']['name'],
+            body=[self.visit(b) for b in node['body']['body']]
+        )
+
+    def visit_ThrowStatement(self, node: dict):
+        return Raise(
+            exc=self.visit(node)
         )

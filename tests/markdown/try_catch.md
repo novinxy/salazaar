@@ -5,6 +5,7 @@ JavaScript:
 try {
     let x = 1 / 0;
 } catch (e) {
+    e += 'err'
     console.log('Error:', e);
 }
 ```
@@ -14,7 +15,8 @@ Python
 try:
     x = 1 / 0
 except Exception as e:
-    print('Error:', e)
+    e += 'err'
+    console.log('Error:', e)
 ```
 
 ---
@@ -35,9 +37,9 @@ try {
 Python
 ```py
 try:
-    do_something()
+    doSomething()
 except Exception as err:
-    handle_error(err)
+    handleError(err)
 finally:
     cleanup()
 ```
@@ -60,9 +62,10 @@ try {
 Python
 ```py
 try:
-    json.loads('invalid')
-except json.JSONDecodeError:
-    print('Syntax error!')
+    JSON.parse('invalid')
+except Exception as e:
+    if isinstance(e, SyntaxError):
+        console.log('Syntax error!')
 ```
 
 ---
@@ -109,7 +112,7 @@ try {
 Python
 ```py
 try:
-    do_something()
+    doSomething()
 except Exception as e:
     raise
 ```
