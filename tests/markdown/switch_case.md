@@ -21,14 +21,14 @@ switch (value) {
 ```
 
 Python:
-```python
+```py
 match value:
     case 1:
-        result = "one"
+        result = 'one'
     case 2:
-        result = "two"
+        result = 'two'
     case _:
-        result = "other"
+        result = 'other'
 ```
 
 
@@ -50,14 +50,14 @@ switch (color) {
 ```
 
 Python:
-```python
+```py
 match color:
-    case "red" | "blue":
-        result = "primary"
-    case "green":
-        result = "secondary"
+    case 'red' | 'blue':
+        result = 'primary'
+    case 'green':
+        result = 'secondary'
     case _:
-        result = "unknown"
+        result = 'unknown'
 ```
 
 
@@ -75,12 +75,12 @@ switch (x + y) {
 ```
 
 Python:
-```python
+```py
 match x + y:
     case 10:
-        result = "ten"
+        result = 'ten'
     case _:
-        result = "not ten"
+        result = 'not ten'
 ```
 
 
@@ -99,11 +99,11 @@ switch (status) {
 ```
 
 Python:
-```python
+```py
 match status:
-    case "ok":
+    case 'ok':
         result = True
-    case "fail":
+    case 'fail':
         result = False
 ```
 
@@ -128,14 +128,14 @@ switch (type) {
 ```
 
 Python:
-```python
+```py
 match type:
-    case "A":
+    case 'A':
         match subtype:
             case 1:
-                result = "A1"
+                result = 'A1'
             case _:
-                result = "A-other"
+                result = 'A-other'
     case _:
-            result = "other"
+            result = 'other'
 ```

@@ -10,6 +10,7 @@ from ast import (
     BitOr,
     BitXor,
     BoolOp,
+    Break,
     Call,
     Compare,
     Constant,
@@ -29,6 +30,7 @@ from ast import (
     List,
     Lt,
     LtE,
+    Match,
     Mod,
     Module,
     Mult,
@@ -48,6 +50,7 @@ from ast import (
     arg,
     arguments,
     expr,
+    match_case,
 )
 
 
@@ -273,7 +276,6 @@ class ASTConverter:
             value=self.visit(node['right'])
         )
 
-
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
         body = self.visit(node["body"])
@@ -429,10 +431,11 @@ class ASTConverter:
             While(test=test_value, body=body, orelse=[])
         ]
 
-
     def visit_ReturnStatement(self, node: dict):
         return Return(self.visit(node["argument"]))
 
+    def visit_BreakStatement(self, node: dict):
+        return Break()
 
     def visit_ConditionalExpression(self, node: dict):
         return IfExp(
@@ -467,3 +470,29 @@ class ASTConverter:
                 args=arguments(args=[arg(p['name']) for p in node['params']]),
                 body=self.visit(body)
             )
+
+    def visit_SwitchStatement(self, node: dict):
+        cases = []
+        for c in node['cases']:
+            case = self.visit_SwitchCase(c)
+
+            cases.append(case)
+
+        for c in cases:
+            if c.body and isinstance(c.body[-1], Break):
+                c.body.pop()
+
+        return Match(
+            subject=self.visit(node['discriminant']),
+            cases=cases
+        )
+
+    def visit_SwitchCase(self, node: dict):
+        pattern = Name(id='_')
+        if 'test' in node:
+            pattern = self.visit(node['test'])
+
+        return match_case(
+            pattern=pattern,
+            body=[self.visit(c) for c in node['consequent']]
+        )
