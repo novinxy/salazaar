@@ -360,7 +360,6 @@ class ASTConverter:
         test = self.visit(node["test"])
         # TODO GRNO 2025-08-14 : missing functionality for updating loops
         update = self.visit(node["update"])
-        body = self.visit(node["body"])
 
 # For(
 #       target=Name(id='index', ctx=Store()),
@@ -380,17 +379,16 @@ class ASTConverter:
 #             slice=Name(id='index', ctx=Load()),
 #             ctx=Load()))])])
 
-
-        return For(
-            target=init[0].targets[0],
-            iter=Call(
-                func=Name(id="range"),
-                    args=[test],
-                    keywords=[]
-                ),
-            body=body,
-            orelse=[],
-        )
+        body = self.visit(node["body"])
+        body.append(update)
+        return [
+            init[0],
+            While(
+                test=test,
+                body=body,
+                orelse=[],
+            )
+        ]
 
     def visit_UnaryExpression(self, node: dict):
         operator = {"-": USub(), "~": Invert(), "!": Not()}[node["operator"]]

@@ -1,36 +1,3 @@
-## Test case: while loop
-JavaScript:
-```js
-while (true) {
-    var i = 10;
-}
-```
-
-Python:
-```py
-while True:
-    i = 10
-```
-
-## Test case: do-while loop
-JavaScript:
-```js
-do {
-  i += 1;
-  result += i;
-} while (i < 5);
-```
-
-Python:
-```py
-i += 1
-result += i
-while i < 5:
-    i += 1
-    result += i
-
-```
-
 ## Test case: for in
 JavaScript:
 ```js
@@ -69,8 +36,10 @@ for (let index = 0; index < array.length; index++) {
 
 Python:
 ```py
-for index in range(len(array)):
+index = 0
+while index < array.length:
     element = array[index]
+    index += 1
 ```
 
 ## Test case: for loop descending
@@ -83,8 +52,10 @@ for (let index = array.length - 1; index >= 0; index--) {
 
 Python:
 ```py
-for index in range(len(array) - 1, -1, -1):
+index = array.length - 1
+while index >= 0:
     element = array[index]
+    index -= 1
 ```
 
 
