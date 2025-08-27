@@ -109,19 +109,12 @@ class ASTConverter:
         declarations = []
         for declaration in node["declarations"]:
             if declaration["id"]["type"] == "ArrayPattern":
-                # if declaration['init']['type'] == 'ArrayPattern':
                 declarations.append(
                     Assign(
                         targets=[Tuple(elts=[Name(i["name"]) for i in declaration["id"]["elements"]])],
                         value=Tuple(elts=[self.visit(e) for e in declaration["init"]["elements"]]),
                     )
                 )
-                # declarations.append(
-                #     ast.Assign(
-                #         targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in declaration["id"]["elements"]])],
-                #         value=ast.Tuple(elts=[self.visit(declaration['init'])]),
-                #     )
-                # )
 
                 return declarations
 
