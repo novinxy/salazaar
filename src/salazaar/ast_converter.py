@@ -75,7 +75,7 @@ class ASTConverter:
         nodes = [self.visit(n) for n in node["body"]]
         body = []
 
-        # TODO GRNO 2025-08-14 : do something about this shit!!! Use the same as parse_body
+        # TODO GRNO 2025-08-14 : DRY it, use the parse_body
         for n in nodes:
             if n is None:
                 continue
@@ -293,7 +293,7 @@ class ASTConverter:
         )
 
     def parse_body(self, body_statements):
-        # TODO GRNO 2025-08-14 : do something about this shit!!!
+        # TODO GRNO 2025-08-14 : the same comment as for parsing Program
         statements = []
         for b in body_statements:
             statement = self.visit(b)
