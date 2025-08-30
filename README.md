@@ -2,7 +2,9 @@
 
 > **Make your codebase speak snake'ish! 🐍**
 
-**salazaar** is a library that transpiles JavaScript code into syntax-correct Python code. Its main goal is to help you migrate legacy, untyped JS projects into the modern Python ecosystem as smoothly as possible.
+**salazaar** is a library that transpiles JavaScript code into syntax-correct Python code.
+
+Main goal is to help you migrate legacy, untyped JS projects into the modern Python ecosystem as smoothly as possible.
 
 ---
 
