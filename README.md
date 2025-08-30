@@ -25,10 +25,10 @@ What salazaar implements are rules for converting AST, many of which are opinion
 
 ## Limitations
 
-- **Variable Scoping:** Differences in global/non-local variables and `var` behavior may require manual adjustments.
-- **Built-in Libraries:** Many JS built-ins are not translated and may need custom handling.
-- **Type Inference:** No automatic JS type inference; some function calls may not convert directly.
 - **Not a Silver Bullet:** The tool is designed to simplify, not fully automate, the migration process.
+- **Type Inference:** No automatic JS type inference; some function calls may not convert directly.
+- **Built-in Libraries:** Many JS built-ins are not translated and may need custom handling.
+- **Variable Scoping:** Differences in global/non-local variables and `var` behavior may require manual adjustments.
 
 ---
 
