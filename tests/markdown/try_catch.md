@@ -4,6 +4,7 @@ JavaScript:
 ```js
 try {
     let x = 1 / 0;
+    console.log("Hello world");
 } catch (e) {
     e += 'err'
     console.log('Error:', e);
@@ -14,6 +15,7 @@ Python
 ```py
 try:
     x = 1 / 0
+    console.log('Hello world')
 except Exception as e:
     e += 'err'
     console.log('Error:', e)

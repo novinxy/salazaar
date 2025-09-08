@@ -158,7 +158,10 @@ class ASTConverter:
         return Name(id=value)
 
     def visit_ExpressionStatement(self, node: dict):
+        if node["expression"]['type'] == 'CallExpression':
+            return Expr(self.visit(node["expression"]))
         return self.visit(node["expression"])
+
 
     def visit_BinaryExpression(self, node: dict):
         operators_mapping: dict[str, Any] = {
