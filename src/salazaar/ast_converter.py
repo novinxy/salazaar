@@ -14,6 +14,7 @@ from ast import (
     Call,
     Compare,
     Constant,
+    Continue,
     Dict,
     Div,
     Eq,
@@ -417,6 +418,9 @@ class ASTConverter:
 
     def visit_BreakStatement(self, node: dict):
         return Break()
+
+    def visit_ContinueStatement(self, node: dict):
+        return Continue()
 
     def visit_ConditionalExpression(self, node: dict):
         return IfExp(
