@@ -159,6 +159,8 @@ class ASTConverter:
 
     def visit_ExpressionStatement(self, node: dict):
         if node["expression"]['type'] == 'CallExpression':
+            # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
+
             return Expr(self.visit(node["expression"]))
         return self.visit(node["expression"])
 
@@ -431,9 +433,13 @@ class ASTConverter:
                 body=self.visit(body['argument'])
             )
         else:
+            # TODO GRNO 2025-09-08 : Hate this code. I Only needed to implement this because of how Expr and ExpressionStatement differ in python and JS
+            body = self.visit(body)
+            if isinstance(body, Expr):
+                body = body.value
             return Lambda(
                 args=arguments(args=[arg(p['name']) for p in node['params']]),
-                body=self.visit(body)
+                body=body
             )
 
     def visit_ArrowFunctionExpression(self, node: dict):
