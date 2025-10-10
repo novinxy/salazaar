@@ -513,5 +513,5 @@ class ASTConverter:
 
     def visit_ThrowStatement(self, node: dict):
         return Raise(
-            exc=self.visit(node)
+            exc=self.visit(node['argument'])
         )

@@ -116,5 +116,5 @@ Python
 try:
     doSomething()
 except Exception as e:
-    raise
+    raise e
 ```
