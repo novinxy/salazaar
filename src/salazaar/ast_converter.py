@@ -89,22 +89,14 @@ class ASTConverter:
         return Module(body=body, type_ignores=[])
 
     def visit_UpdateExpression(self, node: dict):
-        operator = node['operator']
+        operator = node["operator"]
         match operator:
-            case '++':
-                return AugAssign(
-                    target=self.visit(node['argument']),
-                    op=Add(),
-                    value=Constant(value=1)
-                )
-            case '--':
-                return AugAssign(
-                    target=self.visit(node['argument']),
-                    op=Sub(),
-                    value=Constant(value=1)
-                )
+            case "++":
+                return AugAssign(target=self.visit(node["argument"]), op=Add(), value=Constant(value=1))
+            case "--":
+                return AugAssign(target=self.visit(node["argument"]), op=Sub(), value=Constant(value=1))
             case _:
-                raise ValueError(f'Incorrect operator {operator}')
+                raise ValueError(f"Incorrect operator {operator}")
 
     def visit_VariableDeclaration(self, node: dict):
         declarations = []
@@ -126,11 +118,11 @@ class ASTConverter:
                 value = self.visit(assigned_value)
                 targets += value.targets
                 value = value.value
-            elif assigned_value['type'] == 'FunctionExpression' and len(assigned_value['body']['body']) > 1:
+            elif assigned_value["type"] == "FunctionExpression" and len(assigned_value["body"]["body"]) > 1:
                 return FunctionDef(
                     name=declaration["id"]["name"],
-                    args=arguments(args=[arg(p['name']) for p in assigned_value['params']]),
-                    body=self.visit(assigned_value['body'])
+                    args=arguments(args=[arg(p["name"]) for p in assigned_value["params"]]),
+                    body=self.visit(assigned_value["body"]),
                 )
             else:
                 value = self.visit(assigned_value)
@@ -159,12 +151,11 @@ class ASTConverter:
         return Name(id=value)
 
     def visit_ExpressionStatement(self, node: dict):
-        if node["expression"]['type'] == 'CallExpression':
+        if node["expression"]["type"] == "CallExpression":
             # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
 
             return Expr(self.visit(node["expression"]))
         return self.visit(node["expression"])
-
 
     def visit_BinaryExpression(self, node: dict):
         operators_mapping: dict[str, Any] = {
@@ -195,31 +186,15 @@ class ASTConverter:
 
         match operator:
             case "==" | "!=" | "===" | "!==" | ">" | ">=" | "<" | "<=":
-                return Compare(
-                    left=left,
-                    ops=[operators_mapping[operator]],
-                    comparators=[right]
-                )
+                return Compare(left=left, ops=[operators_mapping[operator]], comparators=[right])
             case "+" | "-" | "*" | "/" | "%" | "**" | "<<" | ">>" | "|" | "^" | "&":
-                return BinOp(
-                    op=operators_mapping[operator],
-                    left=left,
-                    right=right
-                )
-            case 'in':
-                return Call(
-                    func=Name('hasattr'),
-                    args=[right, left],
-                    keywords=[]
-                )
-            case 'instanceof':
-                return Call(
-                    func=Name('isinstance'),
-                    args=[left, right],
-                    keywords=[]
-                )
+                return BinOp(op=operators_mapping[operator], left=left, right=right)
+            case "in":
+                return Call(func=Name("hasattr"), args=[right, left], keywords=[])
+            case "instanceof":
+                return Call(func=Name("isinstance"), args=[left, right], keywords=[])
             case _:
-                raise ValueError(f'Incorrect operator: {operator}')
+                raise ValueError(f"Incorrect operator: {operator}")
 
     def visit_CallExpression(self, node: dict):
         args = [self.visit(arg) for arg in node["arguments"]]
@@ -242,9 +217,9 @@ class ASTConverter:
 
         rhs = node["right"]
 
-        operator = node['operator']
+        operator = node["operator"]
 
-        if operator == '=':
+        if operator == "=":
             # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
             while rhs["type"] == "AssignmentExpression":
                 targets.append(self.visit_Identifier(rhs["left"]))
@@ -259,24 +234,20 @@ class ASTConverter:
             return Assign(targets=targets, value=value)
 
         operators = {
-            '+=': Add(),
-            '-=': Sub(),
-            '*=': Mult(),
-            '/=': Div(),
-            '%=': Mod(),
-            '<<=': LShift(),
-            '>>=': RShift(),
-            '|=': BitOr(),
-            '^=': BitXor(),
-            '&=': BitAnd()
+            "+=": Add(),
+            "-=": Sub(),
+            "*=": Mult(),
+            "/=": Div(),
+            "%=": Mod(),
+            "<<=": LShift(),
+            ">>=": RShift(),
+            "|=": BitOr(),
+            "^=": BitXor(),
+            "&=": BitAnd(),
         }
 
         op = operators[operator]
-        return AugAssign(
-            target=self.visit(node['left']),
-            op=op,
-            value=self.visit(node['right'])
-        )
+        return AugAssign(target=self.visit(node["left"]), op=op, value=self.visit(node["right"]))
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
@@ -371,7 +342,7 @@ class ASTConverter:
                 test=test,
                 body=body,
                 orelse=[],
-            )
+            ),
         ]
 
     def visit_UnaryExpression(self, node: dict):
@@ -408,10 +379,7 @@ class ASTConverter:
         test_value = self.visit(node["test"])
         body = self.visit(node["body"])
 
-        return [
-            body,
-            While(test=test_value, body=body, orelse=[])
-        ]
+        return [body, While(test=test_value, body=body, orelse=[])]
 
     def visit_ReturnStatement(self, node: dict):
         return Return(self.visit(node["argument"]))
@@ -424,45 +392,36 @@ class ASTConverter:
 
     def visit_ConditionalExpression(self, node: dict):
         return IfExp(
-            test=self.visit(node['test']),
-            body=self.visit(node['consequent']),
-            orelse=self.visit(node['alternate']),
+            test=self.visit(node["test"]),
+            body=self.visit(node["consequent"]),
+            orelse=self.visit(node["alternate"]),
         )
 
     def visit_FunctionExpression(self, node: dict):
-        body = node['body']['body'][0]
-        if body['type'] == 'ReturnStatement':
+        body = node["body"]["body"][0]
+        if body["type"] == "ReturnStatement":
             return Lambda(
-                args=arguments(args=[arg(p['name']) for p in node['params']]),
-                body=self.visit(body['argument'])
+                args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=self.visit(body["argument"])
             )
         else:
             # TODO GRNO 2025-09-08 : Hate this code. I Only needed to implement this because of how Expr and ExpressionStatement differ in python and JS
             body = self.visit(body)
             if isinstance(body, Expr):
                 body = body.value
-            return Lambda(
-                args=arguments(args=[arg(p['name']) for p in node['params']]),
-                body=body
-            )
+            return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=body)
 
     def visit_ArrowFunctionExpression(self, node: dict):
-        body = node['body']
-        if body['type'] == 'ReturnStatement':
-
+        body = node["body"]
+        if body["type"] == "ReturnStatement":
             return Lambda(
-                args=arguments(args=[arg(p['name']) for p in node['params']]),
-                body=self.visit(body['argument'])
+                args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=self.visit(body["argument"])
             )
         else:
-            return Lambda(
-                args=arguments(args=[arg(p['name']) for p in node['params']]),
-                body=self.visit(body)
-            )
+            return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=self.visit(body))
 
     def visit_SwitchStatement(self, node: dict):
         cases = []
-        for c in node['cases']:
+        for c in node["cases"]:
             case = self.visit_SwitchCase(c)
 
             cases.append(case)
@@ -471,20 +430,14 @@ class ASTConverter:
             if c.body and isinstance(c.body[-1], Break):
                 c.body.pop()
 
-        return Match(
-            subject=self.visit(node['discriminant']),
-            cases=cases
-        )
+        return Match(subject=self.visit(node["discriminant"]), cases=cases)
 
     def visit_SwitchCase(self, node: dict):
-        pattern = Name(id='_')
-        if 'test' in node:
-            pattern = self.visit(node['test'])
+        pattern = Name(id="_")
+        if "test" in node:
+            pattern = self.visit(node["test"])
 
-        return match_case(
-            pattern=pattern,
-            body=[self.visit(c) for c in node['consequent']]
-        )
+        return match_case(pattern=pattern, body=[self.visit(c) for c in node["consequent"]])
 
     def visit_TryStatement(self, node: dict):
         # somehow bodies in here work strange as they are missing Expression for CallExpressions
@@ -492,12 +445,12 @@ class ASTConverter:
         # I'm thinking if maybe we should write special method for it and wrap calls
 
         result = Try(
-            body=self.visit(node['block']),
-            handlers=[self.visit(node['handler'])],
+            body=self.visit(node["block"]),
+            handlers=[self.visit(node["handler"])],
         )
 
-        if 'finalizer' in node:
-            result.finalbody = self.visit(node['finalizer'])
+        if "finalizer" in node:
+            result.finalbody = self.visit(node["finalizer"])
 
         return result
 
@@ -506,12 +459,12 @@ class ASTConverter:
         # it's not needed in other places and is safer that way
         # I'm thinking if maybe we should write special method for it and wrap calls
         return ExceptHandler(
-            type=Name(id='Exception'),
-            name=node['param']['name'],
-            body=[self.visit(b) for b in node['body']['body']]
+            type=Name(id="Exception"), name=node["param"]["name"], body=[self.visit(b) for b in node["body"]["body"]]
         )
 
     def visit_ThrowStatement(self, node: dict):
-        return Raise(
-            exc=self.visit(node['argument'])
-        )
+        exc = self.visit(node["argument"])
+        if node["argument"]["type"] == "Literal":
+            exc = Call(func=Name("Exception"), args=[exc])
+
+        return Raise(exc=exc)
