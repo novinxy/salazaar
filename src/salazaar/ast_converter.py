@@ -429,6 +429,18 @@ class ASTConverter:
 
     def visit_ArrowFunctionExpression(self, node: dict):
         body = node["body"]
+
+        if body['type'] == 'BlockStatement' and len(body['body']) != 1:
+            self.injected_blocks.append(
+                FunctionDef(
+                    name="local_anonymous_func",
+                    args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+                    body=self.visit(body),
+                )
+            )
+
+            return Name(id='local_anonymous_func')
+
         body = self.visit(body)
 
         if isinstance(body, Expr) or isinstance(body, Return):
