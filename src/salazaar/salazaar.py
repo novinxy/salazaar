@@ -8,7 +8,7 @@ from salazaar.ast_converter import ASTConverter
 
 
 def get_js_ast(js_code: str) -> dict:
-    data = esprima.parse(js_code)
+    data = esprima.parseModule(js_code)
     return data.toDict()
 
 

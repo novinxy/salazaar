@@ -1,5 +1,6 @@
 from typing import Any
 from ast import (
+    alias,
     Add,
     And,
     Assign,
@@ -26,6 +27,8 @@ from ast import (
     GtE,
     If,
     IfExp,
+    Import,
+    ImportFrom,
     Invert,
     LShift,
     Lambda,
@@ -57,6 +60,8 @@ from ast import (
     match_case,
 )
 
+
+# pylint: disable=invalid-name
 
 class ASTConverter:
     def __init__(self):
@@ -497,3 +502,25 @@ class ASTConverter:
             exc = Call(func=Name("Exception"), args=[exc])
 
         return Raise(exc=exc)
+
+    def visit_ImportDeclaration(self, node: dict):
+        module_name = node['source']['value'].split('.')[0].replace('/', '.')
+
+        if node['specifiers']:
+            if node['specifiers'][0]['type'] == 'ImportNamespaceSpecifier':
+                asname = node['specifiers'][0]['local']['name']
+                if asname == module_name:
+                    asname = None
+                return Import(
+                    names=[alias(name=module_name, asname=asname)]
+                )
+            return ImportFrom(
+                module=module_name,
+                names=[alias(name=s['local']['name']) for s in node['specifiers']],
+                level=0,
+            )
+
+
+        return Import(
+            names=[alias(name=module_name)]
+        )
