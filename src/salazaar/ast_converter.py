@@ -76,7 +76,6 @@ class ASTConverter:
         nodes = [self.visit(n) for n in node["body"]]
         body = []
 
-        # TODO GRNO 2025-08-14 : DRY it, use the parse_body
         for n in nodes:
             if n is None:
                 continue
@@ -262,20 +261,19 @@ class ASTConverter:
             decorator_list=[],
         )
 
-    def parse_body(self, body_statements):
-        # TODO GRNO 2025-08-14 : the same comment as for parsing Program
-        statements = []
+    def visit_BlockStatement(self, node: dict):
+        body_statements = node["body"]
+
+        block = []
+        
         for b in body_statements:
             statement = self.visit(b)
             if not isinstance(statement, list):
                 statement = [statement]
 
-            statements += statement
+            block += statement
 
-        return statements
-
-    def visit_BlockStatement(self, node: dict):
-        return self.parse_body(node["body"])
+        return block
 
     def visit_LogicalExpression(self, node: dict):
         # TODO GRNO 2025-08-14 : hate this function. We should quickly fix this one
