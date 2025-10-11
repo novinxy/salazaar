@@ -83,10 +83,14 @@ class ASTConverter:
             if n is None:
                 continue
 
-            if isinstance(n, list):
-                body += n
-            else:
-                body += [n]
+            if not isinstance(n, list):
+                n = [n]
+
+            if self.injected_blocks:
+                body += self.injected_blocks
+                self.injected_blocks = []
+
+            body += n
 
         return Module(body=body, type_ignores=[])
 
@@ -403,7 +407,18 @@ class ASTConverter:
         )
 
     def visit_FunctionExpression(self, node: dict):
-        body = node["body"]["body"][0]
+        node_body = node["body"]
+        if len(node_body["body"]) != 1:
+            self.injected_blocks.append(
+                FunctionDef(
+                    name=node["id"]["name"] if node["id"] else "_lambda_func",
+                    args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+                    body=self.visit(node_body),
+                )
+            )
+
+            return Name(id=node['id']['name'])
+        body = node_body["body"][0]
 
         body = self.visit(body)
 

@@ -61,7 +61,6 @@ Python:
 def calc(a):
     a += 5
     return a * a
-
 result = collection.map(calc)
 ```
 
