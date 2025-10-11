@@ -429,12 +429,12 @@ class ASTConverter:
 
     def visit_ArrowFunctionExpression(self, node: dict):
         body = node["body"]
-        if body["type"] == "ReturnStatement":
-            return Lambda(
-                args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=self.visit(body["argument"])
-            )
-        else:
-            return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=self.visit(body))
+        body = self.visit(body)
+
+        if isinstance(body, Expr) or isinstance(body, Return):
+            body = body.value
+
+        return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=body)
 
     def visit_SwitchStatement(self, node: dict):
         cases = []
