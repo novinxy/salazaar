@@ -59,6 +59,9 @@ from ast import (
 
 
 class ASTConverter:
+    def __init__(self):
+        self.injected_blocks = []
+
     def visit(self, node: dict) -> Any:
         node_type = node["type"]
         method = "visit_" + node_type
@@ -265,11 +268,15 @@ class ASTConverter:
         body_statements = node["body"]
 
         block = []
-        
+
         for b in body_statements:
             statement = self.visit(b)
             if not isinstance(statement, list):
                 statement = [statement]
+
+            if self.injected_blocks:
+                block += self.injected_blocks
+                self.injected_blocks = []
 
             block += statement
 
@@ -397,16 +404,13 @@ class ASTConverter:
 
     def visit_FunctionExpression(self, node: dict):
         body = node["body"]["body"][0]
-        if body["type"] == "ReturnStatement":
-            return Lambda(
-                args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=self.visit(body["argument"])
-            )
-        else:
-            # TODO GRNO 2025-09-08 : Hate this code. I Only needed to implement this because of how Expr and ExpressionStatement differ in python and JS
-            body = self.visit(body)
-            if isinstance(body, Expr):
-                body = body.value
-            return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=body)
+
+        body = self.visit(body)
+
+        if isinstance(body, Expr) or isinstance(body, Return):
+            body = body.value
+
+        return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=body)
 
     def visit_ArrowFunctionExpression(self, node: dict):
         body = node["body"]
