@@ -127,5 +127,5 @@ test.value = "hello world"
 
 Python:
 ```py
-test.value = "hello world"
+test.value = 'hello world'
 ```
