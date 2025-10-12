@@ -58,5 +58,72 @@ while index >= 0:
     index -= 1
 ```
 
+## Test case: for of loop with continue statement
+JavaScript:
+```js
+for (const elem of collection) {
+    if (elem == 2) {
+        continue
+    }
+    var tmp = elem;
+}
+```
+
+Python:
+```py
+for elem in collection:
+    if elem == 2:
+        continue
+    tmp = elem
+```
+
+## Test case: for in loop with break statement
+JavaScript:
+```js
+for (const i in collection) {
+    let elem = collection[i];
+    if (elem == 2) {
+        break
+    }
+    var tmp = elem;
+}
+```
+
+Python:
+```py
+for i in range(len(collection)):
+    elem = collection[i]
+    if elem == 2:
+        break
+    tmp = elem
+```
+
+## Test case: for in loop with return statement
+JavaScript:
+```js
+function hello() {
+    for (const i in collection) {
+        let elem = collection[i];
+        if (elem == 3) {
+            return
+        }
+        var tmp = elem;
+    }
+}
+```
+
+Python:
+```py
+def hello():
+    for i in range(len(collection)):
+        elem = collection[i]
+        if elem == 3:
+            return
+        tmp = elem
+```
+
+
+
+
 
 todo: add test for missing tests for returns, breaks and continue

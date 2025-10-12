@@ -67,7 +67,10 @@ class ASTConverter:
     def __init__(self):
         self.injected_blocks = []
 
-    def visit(self, node: dict) -> Any:
+    def visit(self, node: dict|None) -> Any:
+        if node is None:
+            return None
+
         node_type = node["type"]
         method = "visit_" + node_type
         visitor = getattr(self, method)
@@ -396,7 +399,7 @@ class ASTConverter:
         return [body, While(test=test_value, body=body, orelse=[])]
 
     def visit_ReturnStatement(self, node: dict):
-        return Return(self.visit(node["argument"]))
+        return Return(value=self.visit(node.get("argument")))
 
     def visit_BreakStatement(self, node: dict):
         return Break()
