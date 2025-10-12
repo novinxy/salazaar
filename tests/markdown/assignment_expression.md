@@ -118,3 +118,14 @@ Python:
 ```py
 num &= 1
 ```
+
+## Test case: Member assignment expression
+JavaScript:
+```js
+test.value = "hello world"
+```
+
+Python:
+```py
+test.value = "hello world"
+```
