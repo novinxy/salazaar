@@ -1,5 +1,6 @@
 from typing import Any
 from ast import (
+    ClassDef,
     alias,
     Add,
     And,
@@ -527,3 +528,24 @@ class ASTConverter:
         return Import(
             names=[alias(name=module_name)]
         )
+    
+    def visit_ClassDeclaration(self, node: dict):
+        
+        return ClassDef(
+            name=node['id']['name'],
+            bases=[self.visit(node.get('superClass'))],
+            body=self.visit(node['body'])
+        )
+
+    def visit_ClassBody(self, node: dict):
+        return [
+            self.visit(n) for n in node['body']
+        ]
+    
+    def visit_MethodDefinition(self, node: dict):
+        if node['kind'] == 'constructor':
+            return FunctionDef(
+                name='__init__',
+                args=arguments(args=[self.visit(a) for a in node['value']['params']]),
+                body=self.visit(node['value']['body'])
+            )
