@@ -530,10 +530,14 @@ class ASTConverter:
         )
     
     def visit_ClassDeclaration(self, node: dict):
+
+        bases = [None]
+        if super_class := self.visit(node.get('superClass')):
+            bases = [super_class]
         
         return ClassDef(
             name=node['id']['name'],
-            bases=[self.visit(node.get('superClass'))],
+            bases=bases,
             body=self.visit(node['body'])
         )
 
@@ -549,3 +553,7 @@ class ASTConverter:
                 args=arguments(args=[self.visit(a) for a in node['value']['params']]),
                 body=self.visit(node['value']['body'])
             )
+        
+
+    def visit_ThisExpression(self, node: dict):
+        return Name(id='self')
