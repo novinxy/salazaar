@@ -98,7 +98,7 @@ for i in range(len(collection)):
     tmp = elem
 ```
 
-## Test case: for in loop with return statement
+## Test case: for in loop with empty return statement
 JavaScript:
 ```js
 function hello() {
@@ -122,8 +122,50 @@ def hello():
         tmp = elem
 ```
 
+## Test case: for in loop with null return statement
+JavaScript:
+```js
+function hello() {
+    for (const i in collection) {
+        let elem = collection[i];
+        if (elem == 3) {
+            return null
+        }
+        var tmp = elem;
+    }
+}
+```
 
+Python:
+```py
+def hello():
+    for i in range(len(collection)):
+        elem = collection[i]
+        if elem == 3:
+            return None
+        tmp = elem
+```
 
+## Test case: for in loop with return statement
+JavaScript:
+```js
+function hello() {
+    for (const i in collection) {
+        let elem = collection[i];
+        if (elem == 3) {
+            return elem
+        }
+        var tmp = elem;
+    }
+}
+```
 
-
-todo: add test for missing tests for returns, breaks and continue
+Python:
+```py
+def hello():
+    for i in range(len(collection)):
+        elem = collection[i]
+        if elem == 3:
+            return elem
+        tmp = elem
+```
