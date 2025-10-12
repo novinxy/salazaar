@@ -228,7 +228,7 @@ class ASTConverter:
     def visit_AssignmentExpression(self, node: dict):
         targets = []
         # TODO GRNO 2025-08-14 : are we sure about this line ?
-        targets.append(self.visit_Identifier(node["left"]))
+        targets.append(self.visit(node["left"]))
 
         rhs = node["right"]
 
@@ -237,7 +237,7 @@ class ASTConverter:
         if operator == "=":
             # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
             while rhs["type"] == "AssignmentExpression":
-                targets.append(self.visit_Identifier(rhs["left"]))
+                targets.append(self.visit(rhs["left"]))
 
                 rhs = rhs["right"]
 
