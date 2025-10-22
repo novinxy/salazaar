@@ -308,19 +308,11 @@ class ASTConverter:
             if (
                 obj["type"] == "LogicalExpression"
                 and operator == obj['operator']
-                # and obj["left"]["type"] == "LogicalExpression"
-                # and obj["operator"] == obj["left"]["operator"]
             ):
                 values1 = []
                 values1 += parse_left(obj["left"], obj['operator'])
                 values1.append(self.visit(obj["right"]))
                 return values1
-
-            # if obj['type'] == 'LogicalExpression':
-            #     values1 = []
-            #     values1.append(self.visit(obj['left']))
-            #     values1.append(self.visit(obj['right']))
-            #     return values1
 
             return [self.visit(obj)]
 
