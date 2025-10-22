@@ -300,16 +300,19 @@ class ASTConverter:
 
         bool_ops = {"&&": And(), "||": Or()}
 
+        operator = node["operator"]
+
         values = []
 
-        def parse_left(obj):
+        def parse_left(obj, operator):
             if (
                 obj["type"] == "LogicalExpression"
-                and obj["left"]["type"] == "LogicalExpression"
-                and obj["operator"] == obj["left"]["operator"]
+                and operator == obj['operator']
+                # and obj["left"]["type"] == "LogicalExpression"
+                # and obj["operator"] == obj["left"]["operator"]
             ):
                 values1 = []
-                values1 += parse_left(obj["left"])
+                values1 += parse_left(obj["left"], obj['operator'])
                 values1.append(self.visit(obj["right"]))
                 return values1
 
@@ -321,11 +324,11 @@ class ASTConverter:
 
             return [self.visit(obj)]
 
-        values += parse_left(node["left"])
+        values += parse_left(node["left"], operator)
         # values.append(self.visit(node['left']))
         values.append(self.visit(node["right"]))
 
-        return BoolOp(op=bool_ops[node["operator"]], values=values)
+        return BoolOp(op=bool_ops[operator], values=values)
 
     def visit_IfStatement(self, node: dict):
         orelse = []
@@ -528,13 +531,13 @@ class ASTConverter:
         return Import(
             names=[alias(name=module_name)]
         )
-    
+
     def visit_ClassDeclaration(self, node: dict):
 
         bases = [None]
         if super_class := self.visit(node.get('superClass')):
             bases = [super_class]
-        
+
         return ClassDef(
             name=node['id']['name'],
             bases=bases,
@@ -545,7 +548,7 @@ class ASTConverter:
         return [
             self.visit(n) for n in node['body']
         ]
-    
+
     def visit_MethodDefinition(self, node: dict):
         if node['kind'] == 'constructor':
             return FunctionDef(
@@ -553,7 +556,7 @@ class ASTConverter:
                 args=arguments(args=[self.visit(a) for a in node['value']['params']]),
                 body=self.visit(node['value']['body'])
             )
-        
+
 
     def visit_ThisExpression(self, node: dict):
         return Name(id='self')

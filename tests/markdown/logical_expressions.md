@@ -74,6 +74,17 @@ Python:
 False and True and True
 ```
 
+## Test case: another one with parentheses
+JavaScript:
+```js
+(false && true) && true
+```
+
+Python:
+```py
+(False and True) and True
+```
+
 ## Test case: another two
 JavaScript:
 ```js
@@ -96,7 +107,7 @@ Python:
 False or (True and False) or (True and False) or True
 ```
 
-## Test case: chained logical expressions
+## Test case: chained logical expressions 2
 JavaScript:
 ```js
 var1 == var2 && var3 != var4 || var5 === var6
