@@ -413,15 +413,19 @@ class ASTConverter:
     def visit_FunctionExpression(self, node: dict):
         node_body = node["body"]
         if len(node_body["body"]) != 1:
+            func_name =  "local_anonymous_func"
+            if node.get("id"):
+                func_name = node["id"]["name"]
+
             self.injected_blocks.append(
                 FunctionDef(
-                    name=node["id"]["name"] if node["id"] else "_lambda_func",
+                    name=func_name,
                     args=arguments(args=[arg(p["name"]) for p in node["params"]]),
                     body=self.visit(node_body),
                 )
             )
 
-            return Name(id=node['id']['name'])
+            return Name(id=func_name)
         body = node_body["body"][0]
 
         body = self.visit(body)

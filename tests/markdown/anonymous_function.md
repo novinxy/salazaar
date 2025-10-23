@@ -24,6 +24,5 @@ Python:
 def local_anonymous_func(x, y):
     tmp = x + y
     return tmp
-
 squares = numbers.map(local_anonymous_func)
 ```
