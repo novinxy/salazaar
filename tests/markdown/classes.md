@@ -101,3 +101,10 @@ class Rectangle:
         self.height = height
         self.width = width
 ```
+
+
+Maybe also following tests:
+- static methods
+- class methods
+- class properties
+- multiple functions
