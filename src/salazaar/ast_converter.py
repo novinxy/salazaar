@@ -133,11 +133,22 @@ class ASTConverter:
                 value = self.visit(assigned_value)
                 targets += value.targets
                 value = value.value
+
             elif assigned_value["type"] == "FunctionExpression" and len(assigned_value["body"]["body"]) > 1:
                 return FunctionDef(
                     name=declaration["id"]["name"],
                     args=arguments(args=[arg(p["name"]) for p in assigned_value["params"]]),
                     body=self.visit(assigned_value["body"]),
+                )
+            elif assigned_value['type'] == 'ClassExpression':
+                bases = []
+                if base := assigned_value.get('superClass'):
+                    bases = [self.visit(base)]
+
+                return ClassDef(
+                    name=declaration['id']['name'],
+                    bases=bases,
+                    body=self.visit(assigned_value['body'])
                 )
             else:
                 value = self.visit(assigned_value)
@@ -215,6 +226,14 @@ class ASTConverter:
         args = [self.visit(arg) for arg in node["arguments"]]
 
         callee = node["callee"]
+
+        if callee['type'] == 'Super':
+            return Call(
+                func=Attribute(
+                    value=Call(func=Name(id='super')),
+                    attr='__init__'
+                )
+            )
 
         func = self.visit(callee)
 
@@ -529,10 +548,9 @@ class ASTConverter:
         )
 
     def visit_ClassDeclaration(self, node: dict):
-
-        bases = [None]
-        if super_class := self.visit(node.get('superClass')):
-            bases = [super_class]
+        bases = []
+        if base := node.get('superClass'):
+            bases = [self.visit(base)]
 
         return ClassDef(
             name=node['id']['name'],
@@ -547,12 +565,16 @@ class ASTConverter:
 
     def visit_MethodDefinition(self, node: dict):
         if node['kind'] == 'constructor':
+            params = [Name(id='self'), *(self.visit(a) for a in node['value']['params'])]
             return FunctionDef(
                 name='__init__',
-                args=arguments(args=[self.visit(a) for a in node['value']['params']]),
+                args=arguments(args=params),
                 body=self.visit(node['value']['body'])
             )
-
-
+        
     def visit_ThisExpression(self, node: dict):
         return Name(id='self')
+    
+    def visit_Super(self, node: dict):
+        return Call(func=Name(id='super'))
+        
