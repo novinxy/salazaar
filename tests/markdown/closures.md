@@ -1,15 +1,26 @@
-write some nice tests for string operations
-
-## Test case: fail this test
+## Test case: Closure test
 JavaScript:
 ```js
-while (true) {
-    var i = 10;
+function makeFunc() {
+  const name = "test";
+  function displayName() {
+    console.log(name);
+  }
+  return displayName;
 }
+
+const myFunc = makeFunc();
+myFunc();
 ```
 
 Python:
 ```py
-while False:
-    i = 10
+def makeFunc():
+    name = 'test'
+
+    def displayName():
+        console.log(name)
+    return displayName
+myFunc = makeFunc()
+myFunc()
 ```
