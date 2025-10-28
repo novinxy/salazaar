@@ -381,6 +381,10 @@ class ASTConverter:
         if node["computed"]:
             return Subscript(value=value, slice=self.visit(node["property"]))
 
+        if node['property']['name'] == 'length':
+            params = [Name(id=node['object']['name'])]
+            return Call(func=Name(id='len'), args=params)
+
         return Attribute(value=value, attr=node["property"]["name"])
 
     def visit_ForOfStatement(self, node: dict):

@@ -37,7 +37,7 @@ for (let index = 0; index < array.length; index++) {
 Python:
 ```py
 index = 0
-while index < array.length:
+while index < len(array):
     element = array[index]
     index += 1
 ```
@@ -52,7 +52,7 @@ for (let index = array.length - 1; index >= 0; index--) {
 
 Python:
 ```py
-index = array.length - 1
+index = len(array) - 1
 while index >= 0:
     element = array[index]
     index -= 1
