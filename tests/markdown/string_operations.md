@@ -1,15 +1,74 @@
-write some nice tests for string operations
-
-## Test case: fail this test
+## Test case: One line string initialization
 JavaScript:
 ```js
-while (true) {
-    var i = 10;
-}
+var text = "hello"
 ```
 
 Python:
 ```py
-while False:
-    i = 10
+text = 'hello'
+```
+
+## Test case: String concated with plus sign
+JavaScript:
+```js
+var text = 'hello' + 'world' + 'from py'
+```
+
+Python:
+```py
+text = 'hello' + 'world' + 'from py'
+```
+
+## Test case: String concated with plus sign on many lines
+JavaScript:
+```js
+var text = 'hello' +
+'world' +
+'from py'
+```
+
+Python:
+```py
+text = 'hello' + 'world' + 'from py'
+```
+
+## Test case: String concated with plus sign with variables
+JavaScript:
+```js
+var text = 'hello' + var1 + 'world' + var2
+```
+
+Python:
+```py
+text = 'hello' + var1 + 'world' + var2
+```
+
+
+## Test case: Template Literal
+JavaScript:
+```js
+var text = `hello ${var1} world ${var2}`
+```
+
+Python:
+```py
+text = f'hello {var1} world {var2}'
+```
+
+## Test case: Multiline Template Literal
+JavaScript:
+```js
+var text = `hello
+world
+from py
+`
+```
+
+Python:
+```py
+text = '''hello
+world
+from py
+'''
 ```

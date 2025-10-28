@@ -64,11 +64,12 @@ from ast import (
 
 # pylint: disable=invalid-name
 
+
 class ASTConverter:
     def __init__(self):
         self.injected_blocks = []
 
-    def visit(self, node: dict|None) -> Any:
+    def visit(self, node: dict | None) -> Any:
         if node is None:
             return None
 
@@ -140,16 +141,12 @@ class ASTConverter:
                     args=arguments(args=[arg(p["name"]) for p in assigned_value["params"]]),
                     body=self.visit(assigned_value["body"]),
                 )
-            elif assigned_value['type'] == 'ClassExpression':
+            elif assigned_value["type"] == "ClassExpression":
                 bases = []
-                if base := assigned_value.get('superClass'):
+                if base := assigned_value.get("superClass"):
                     bases = [self.visit(base)]
 
-                return ClassDef(
-                    name=declaration['id']['name'],
-                    bases=bases,
-                    body=self.visit(assigned_value['body'])
-                )
+                return ClassDef(name=declaration["id"]["name"], bases=bases, body=self.visit(assigned_value["body"]))
             else:
                 value = self.visit(assigned_value)
 
@@ -177,7 +174,7 @@ class ASTConverter:
         return Name(id=value)
 
     def visit_ExpressionStatement(self, node: dict):
-        if node["expression"]['type'] in ('CallExpression', 'MemberExpression'):
+        if node["expression"]["type"] in ("CallExpression", "MemberExpression"):
             # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
 
             return Expr(self.visit(node["expression"]))
@@ -227,13 +224,8 @@ class ASTConverter:
 
         callee = node["callee"]
 
-        if callee['type'] == 'Super':
-            return Call(
-                func=Attribute(
-                    value=Call(func=Name(id='super')),
-                    attr='__init__'
-                )
-            )
+        if callee["type"] == "Super":
+            return Call(func=Attribute(value=Call(func=Name(id="super")), attr="__init__"))
 
         func = self.visit(callee)
 
@@ -324,12 +316,9 @@ class ASTConverter:
         values = []
 
         def parse_left(obj, operator):
-            if (
-                obj["type"] == "LogicalExpression"
-                and operator == obj['operator']
-            ):
+            if obj["type"] == "LogicalExpression" and operator == obj["operator"]:
                 values1 = []
-                values1 += parse_left(obj["left"], obj['operator'])
+                values1 += parse_left(obj["left"], obj["operator"])
                 values1.append(self.visit(obj["right"]))
                 return values1
 
@@ -432,7 +421,7 @@ class ASTConverter:
     def visit_FunctionExpression(self, node: dict):
         node_body = node["body"]
         if len(node_body["body"]) != 1:
-            func_name =  "local_anonymous_func"
+            func_name = "local_anonymous_func"
             if node.get("id"):
                 func_name = node["id"]["name"]
 
@@ -457,7 +446,7 @@ class ASTConverter:
     def visit_ArrowFunctionExpression(self, node: dict):
         body = node["body"]
 
-        if body['type'] == 'BlockStatement' and len(body['body']) != 1:
+        if body["type"] == "BlockStatement" and len(body["body"]) != 1:
             self.injected_blocks.append(
                 FunctionDef(
                     name="local_anonymous_func",
@@ -466,7 +455,7 @@ class ASTConverter:
                 )
             )
 
-            return Name(id='local_anonymous_func')
+            return Name(id="local_anonymous_func")
 
         body = self.visit(body)
 
@@ -526,62 +515,48 @@ class ASTConverter:
         return Raise(exc=exc)
 
     def visit_ImportDeclaration(self, node: dict):
-        module_name = node['source']['value'].split('.')[0].replace('/', '.')
+        module_name = node["source"]["value"].split(".")[0].replace("/", ".")
 
-        if node['specifiers']:
-            if node['specifiers'][0]['type'] == 'ImportNamespaceSpecifier':
-                asname = node['specifiers'][0]['local']['name']
+        if node["specifiers"]:
+            if node["specifiers"][0]["type"] == "ImportNamespaceSpecifier":
+                asname = node["specifiers"][0]["local"]["name"]
                 if asname == module_name:
                     asname = None
-                return Import(
-                    names=[alias(name=module_name, asname=asname)]
-                )
+                return Import(names=[alias(name=module_name, asname=asname)])
             return ImportFrom(
                 module=module_name,
-                names=[alias(name=s['local']['name']) for s in node['specifiers']],
+                names=[alias(name=s["local"]["name"]) for s in node["specifiers"]],
                 level=0,
             )
 
-
-        return Import(
-            names=[alias(name=module_name)]
-        )
+        return Import(names=[alias(name=module_name)])
 
     def visit_ClassDeclaration(self, node: dict):
         bases = []
-        if base := node.get('superClass'):
+        if base := node.get("superClass"):
             bases = [self.visit(base)]
 
-        return ClassDef(
-            name=node['id']['name'],
-            bases=bases,
-            body=self.visit(node['body'])
-        )
+        return ClassDef(name=node["id"]["name"], bases=bases, body=self.visit(node["body"]))
 
     def visit_ClassBody(self, node: dict):
-        return [
-            self.visit(n) for n in node['body']
-        ]
+        return [self.visit(n) for n in node["body"]]
 
     def visit_MethodDefinition(self, node: dict):
-        params = [Name(id='self'), *(self.visit(a) for a in node['value']['params'])]
-        body=self.visit(node['value']['body'])
-        if node['kind'] == 'constructor':
-            return FunctionDef(
-                name='__init__',
-                args=arguments(args=params),
-                body=body
-            )
+        params = [Name(id="self"), *(self.visit(a) for a in node["value"]["params"])]
+        body = self.visit(node["value"]["body"])
+        if node["kind"] == "constructor":
+            return FunctionDef(name="__init__", args=arguments(args=params), body=body)
 
-        return FunctionDef(
-            name=node['key']['name'],
-            args=arguments(args=params),
-            body=body
-        )
-
+        return FunctionDef(name=node["key"]["name"], args=arguments(args=params), body=body)
 
     def visit_ThisExpression(self, node: dict):
-        return Name(id='self')
+        return Name(id="self")
 
     def visit_Super(self, node: dict):
-        return Call(func=Name(id='super'))
+        return Call(func=Name(id="super"))
+
+    def visit_TemplateLiteral(self, node: dict):
+        return Constant(value=self.visit(node["quasis"][0]))
+
+    def visit_TemplateElement(self, node: dict):
+        return node["value"]["raw"]
