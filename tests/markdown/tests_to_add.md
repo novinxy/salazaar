@@ -1,7 +1,4 @@
-- continue
-- break
 - regex
-- class creation
 - closures ?
 - bigger test of ready programs
 - ensure that all logical expressions run

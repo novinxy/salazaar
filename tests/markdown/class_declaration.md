@@ -103,8 +103,38 @@ class Rectangle:
 ```
 
 
-Maybe also following tests:
-- static methods
-- class methods
-- class properties
-- multiple functions
+## Test case: Class with functions
+JavaScript:
+```js
+class Rectangle {
+  constructor(height, width) {
+    this.height = height;
+    this.width = width;
+  }
+
+  format(text) {
+    return 'new text: ' + text + this.height;
+  }
+
+  printText(text) {
+    text = this.format(text)
+    console.log(text);
+  }
+};
+```
+
+Python:
+```py
+class Rectangle:
+
+    def __init__(self, height, width):
+        self.height = height
+        self.width = width
+
+    def format(self, text):
+        return 'new text: ' + text + self.height
+
+    def printText(self, text):
+        text = self.format(text)
+        console.log(text)
+```

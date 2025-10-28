@@ -63,3 +63,14 @@ Python:
 ```py
 hello().world('greet')
 ```
+
+## Test case: multiple member expression chained
+JavaScript:
+```js
+hello().world('greet').say(true)
+```
+
+Python:
+```py
+hello().world('greet').say(True)
+```

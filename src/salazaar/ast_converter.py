@@ -177,7 +177,7 @@ class ASTConverter:
         return Name(id=value)
 
     def visit_ExpressionStatement(self, node: dict):
-        if node["expression"]["type"] == "CallExpression":
+        if node["expression"]['type'] in ('CallExpression', 'MemberExpression'):
             # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
 
             return Expr(self.visit(node["expression"]))
@@ -564,17 +564,24 @@ class ASTConverter:
         ]
 
     def visit_MethodDefinition(self, node: dict):
+        params = [Name(id='self'), *(self.visit(a) for a in node['value']['params'])]
+        body=self.visit(node['value']['body'])
         if node['kind'] == 'constructor':
-            params = [Name(id='self'), *(self.visit(a) for a in node['value']['params'])]
             return FunctionDef(
                 name='__init__',
                 args=arguments(args=params),
-                body=self.visit(node['value']['body'])
+                body=body
             )
-        
+
+        return FunctionDef(
+            name=node['key']['name'],
+            args=arguments(args=params),
+            body=body
+        )
+
+
     def visit_ThisExpression(self, node: dict):
         return Name(id='self')
-    
+
     def visit_Super(self, node: dict):
         return Call(func=Name(id='super'))
-        
