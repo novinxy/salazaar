@@ -218,3 +218,18 @@ Python:
 ```py
 flag = flag1 = flag2
 ```
+
+## Test case: multi declaration without initialization is initialized with null value
+JavaScript:
+```js
+let x, y, t, r, e;
+```
+
+Python:
+```py
+x = None
+y = None
+t = None
+r = None
+e = None
+```
