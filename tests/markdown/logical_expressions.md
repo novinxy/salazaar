@@ -139,3 +139,20 @@ Python:
 ```py
 False and True or False and True or True
 ```
+
+## Test case: mixed operators2
+JavaScript:
+```js
+if(false || !true && false || false) {
+
+	var z = 1
+}
+```
+
+Python:
+```py
+if False or not True and False or False:
+	z = 1
+```
+
+
