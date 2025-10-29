@@ -9,7 +9,7 @@ Python:
 text = 'hello'
 ```
 
-## Test case: String concated with plus sign
+## Test case: String concatenation with plus sign
 JavaScript:
 ```js
 var text = 'hello' + 'world' + 'from py'
@@ -20,7 +20,7 @@ Python:
 text = 'hello' + 'world' + 'from py'
 ```
 
-## Test case: String concated with plus sign on many lines
+## Test case: String concatenation with plus sign on many lines
 JavaScript:
 ```js
 var text = 'hello' +
@@ -33,7 +33,7 @@ Python:
 text = 'hello' + 'world' + 'from py'
 ```
 
-## Test case: String concated with plus sign with variables
+## Test case: String concatenation with plus sign with variables
 JavaScript:
 ```js
 var text = 'hello' + var1 + 'world' + var2
