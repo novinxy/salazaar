@@ -549,18 +549,21 @@ class ASTConverter:
         return [self.visit(n) for n in node["body"]]
 
     def visit_MethodDefinition(self, node: dict):
-        params = [Name(id="self"), *(self.visit(a) for a in node["value"]["params"])]
         body = self.visit(node["value"]["body"])
 
-        decorators = []
-        if node["static"]:
-            decorators.append(Name(id="staticmethod"))
-            params = [self.visit(a) for a in node["value"]["params"]]
+        params = [self.visit(a) for a in node["value"]["params"]]
+        decorators = [Name(id="staticmethod")]
 
-        if node["kind"] == "constructor":
-            return FunctionDef(name="__init__", args=arguments(args=params), body=body, decorator_list=decorators)
+        if not node["static"]:
+            decorators = []
+            params = [Name(id="self"), *params]
 
-        return FunctionDef(name=node["key"]["name"], args=arguments(args=params), body=body, decorator_list=decorators)
+        func_name = "__init__"
+        if node["kind"] != "constructor":
+            func_name = node["key"]["name"]
+
+        return FunctionDef(name=func_name, args=arguments(args=params), body=body, decorator_list=decorators)
+
 
     def visit_ThisExpression(self, node: dict):
         return Name(id="self")
