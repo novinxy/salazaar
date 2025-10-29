@@ -1,6 +1,9 @@
 from typing import Any
+import itertools
 from ast import (
     ClassDef,
+    FormattedValue,
+    JoinedStr,
     alias,
     Add,
     And,
@@ -565,7 +568,26 @@ class ASTConverter:
         return Call(func=Name(id="super"))
 
     def visit_TemplateLiteral(self, node: dict):
-        return Constant(value=self.visit(node["quasis"][0]))
+
+        if not node['expressions']:
+            return Constant(value=self.visit(node["quasis"][0]))
+
+        joined_str = []
+        for l, r in itertools.zip_longest(node['quasis'], node['expressions']):
+            if l:
+                joined_str.append(
+                    Constant(l['value']['raw'])
+                )
+            if r:
+                joined_str.append(
+                    FormattedValue(value=self.visit(r), conversion=-1)
+                )
+
+
+        return JoinedStr(
+            values=joined_str
+        )
+
 
     def visit_TemplateElement(self, node: dict):
         return node["value"]["raw"]

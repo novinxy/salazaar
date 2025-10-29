@@ -1,4 +1,4 @@
-## Test case: One line string initialization
+## Test case: one line string initialization
 JavaScript:
 ```js
 var text = "hello"
@@ -9,7 +9,7 @@ Python:
 text = 'hello'
 ```
 
-## Test case: String concatenation with plus sign
+## Test case: string concatenation with plus sign
 JavaScript:
 ```js
 var text = 'hello' + 'world' + 'from py'
@@ -20,7 +20,7 @@ Python:
 text = 'hello' + 'world' + 'from py'
 ```
 
-## Test case: String concatenation with plus sign on many lines
+## Test case: string concatenation with plus sign on many lines
 JavaScript:
 ```js
 var text = 'hello' +
@@ -33,30 +33,35 @@ Python:
 text = 'hello' + 'world' + 'from py'
 ```
 
-## Test case: String concatenation with plus sign with variables
+## Test case: string concatenation with plus sign with variables
 JavaScript:
 ```js
-var text = 'hello' + var1 + 'world' + var2
+var text = 'hello ' + var1 + 'world' + var2
 ```
 
 Python:
 ```py
-text = 'hello' + var1 + 'world' + var2
+text = 'hello ' + var1 + 'world' + var2
 ```
 
 
-## Test case: Template Literal
+## Test case: template literal
 JavaScript:
 ```js
-var text = `hello ${var1} world ${var2}`
+var text1 = `hello ${var1} world ${var2}`
+var text2 = `${var1} World world ${var2}`
+var text3 = `${var1} World ${var2} world`
+
 ```
 
 Python:
 ```py
-text = f'hello {var1} world {var2}'
+text1 = f'hello {var1} world {var2}'
+text2 = f'{var1} World world {var2}'
+text3 = f'{var1} World {var2} world'
 ```
 
-## Test case: Multiline Template Literal
+## Test case: multiline template literal
 JavaScript:
 ```js
 var text = `hello
@@ -67,8 +72,5 @@ from py
 
 Python:
 ```py
-text = '''hello
-world
-from py
-'''
+text = 'hello\nworld\nfrom py\n'
 ```
