@@ -62,6 +62,28 @@ class Rectangle(Shape):
         super().color
 ```
 
+## Test case: Class declaration access base method
+JavaScript:
+```js
+class Rectangle extends Shape {
+  constructor(height, width) {
+    this.height = height;
+    this.width = width;
+    this.color = super.getColor();
+  }
+}
+```
+
+Python:
+```py
+class Rectangle(Shape):
+
+    def __init__(self, height, width):
+        self.height = height
+        self.width = width
+        self.color = super().getColor()
+```
+
 ## Test case: Anonymous class assigned to a variable
 JavaScript:
 ```js
@@ -137,4 +159,23 @@ class Rectangle:
     def printText(self, text):
         text = self.format(text)
         console.log(text)
+```
+
+## Test case: Class with static method
+JavaScript:
+```js
+class Rectangle {
+  static getName() {
+    return "Rectangle";
+  }
+};
+```
+
+Python:
+```py
+class Rectangle:
+
+    @staticmethod
+    def getName():
+        return 'Rectangle'
 ```

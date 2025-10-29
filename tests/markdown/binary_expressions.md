@@ -23,7 +23,7 @@ var1 == var2
 ## Test case: not equal compare
 JavaScript:
 ```js
-var1 != var2;
+var1 !== var2;
 ```
 
 Python:
