@@ -1,0 +1,3 @@
+- regex
+- bigger test of ready programs
+- ensure that all logical expressions run
