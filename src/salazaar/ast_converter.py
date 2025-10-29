@@ -573,14 +573,14 @@ class ASTConverter:
             return Constant(value=self.visit(node["quasis"][0]))
 
         joined_str = []
-        for l, r in itertools.zip_longest(node['quasis'], node['expressions']):
-            if l:
+        for constant, expression in itertools.zip_longest(node['quasis'], node['expressions']):
+            if constant:
                 joined_str.append(
-                    Constant(l['value']['raw'])
+                    Constant(constant['value']['raw'])
                 )
-            if r:
+            if expression:
                 joined_str.append(
-                    FormattedValue(value=self.visit(r), conversion=-1)
+                    FormattedValue(value=self.visit(expression), conversion=-1)
                 )
 
 
