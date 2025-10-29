@@ -384,9 +384,9 @@ class ASTConverter:
         if node["computed"]:
             return Subscript(value=value, slice=self.visit(node["property"]))
 
-        if node['property']['name'] == 'length':
-            params = [Name(id=node['object']['name'])]
-            return Call(func=Name(id='len'), args=params)
+        if node["property"]["name"] == "length":
+            params = [Name(id=node["object"]["name"])]
+            return Call(func=Name(id="len"), args=params)
 
         return Attribute(value=value, attr=node["property"]["name"])
 
@@ -553,9 +553,10 @@ class ASTConverter:
         body = self.visit(node["value"]["body"])
 
         decorators = []
-        if node['static']:
-            decorators.append(Name(id='staticmethod'))
+        if node["static"]:
+            decorators.append(Name(id="staticmethod"))
             params = [self.visit(a) for a in node["value"]["params"]]
+
         if node["kind"] == "constructor":
             return FunctionDef(name="__init__", args=arguments(args=params), body=body, decorator_list=decorators)
 
@@ -568,26 +569,17 @@ class ASTConverter:
         return Call(func=Name(id="super"))
 
     def visit_TemplateLiteral(self, node: dict):
-
-        if not node['expressions']:
+        if not node["expressions"]:
             return Constant(value=self.visit(node["quasis"][0]))
 
         joined_str = []
-        for constant, expression in itertools.zip_longest(node['quasis'], node['expressions']):
+        for constant, expression in itertools.zip_longest(node["quasis"], node["expressions"]):
             if constant:
-                joined_str.append(
-                    Constant(constant['value']['raw'])
-                )
+                joined_str.append(Constant(constant["value"]["raw"]))
             if expression:
-                joined_str.append(
-                    FormattedValue(value=self.visit(expression), conversion=-1)
-                )
+                joined_str.append(FormattedValue(value=self.visit(expression), conversion=-1))
 
-
-        return JoinedStr(
-            values=joined_str
-        )
-
+        return JoinedStr(values=joined_str)
 
     def visit_TemplateElement(self, node: dict):
         return node["value"]["raw"]
