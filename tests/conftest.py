@@ -5,6 +5,9 @@ import os
 
 
 def test_function_template(test_name: str, js: str, py: str) -> str:
+    js = js.replace('\\', '\\\\')
+    py = py.replace('\\', '\\\\')
+
     return f'''
 
 def test_{test_name}():

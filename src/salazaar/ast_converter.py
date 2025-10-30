@@ -573,7 +573,10 @@ class ASTConverter:
 
     def visit_TemplateLiteral(self, node: dict):
         if not node["expressions"]:
-            return Constant(value=self.visit(node["quasis"][0]))
+            value = Constant(
+                value=node["quasis"][0]['value']['raw']
+            )
+            return value
 
         joined_str = []
         for constant, expression in itertools.zip_longest(node["quasis"], node["expressions"]):

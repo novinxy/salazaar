@@ -61,13 +61,24 @@ text2 = f'{var1} World world {var2}'
 text3 = f'{var1} World {var2} world'
 ```
 
-## Test case: multiline template literal
+## Test case: multiline string
 JavaScript:
 ```js
 var text = `hello
 world
 from py
 `
+```
+
+Python:
+```py
+text = 'hello\nworld\nfrom py\n'
+```
+
+## Test case: one-line with caret return string
+JavaScript:
+```js
+var text = "hello\nworld\nfrom py\n"
 ```
 
 Python:
