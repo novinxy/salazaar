@@ -275,8 +275,11 @@ class ASTConverter:
             "&=": BitAnd(),
         }
 
-        op = operators[operator]
-        return AugAssign(target=self.visit(node["left"]), op=op, value=self.visit(node["right"]))
+        return AugAssign(
+            target=self.visit(node["left"]),
+            op=operators[operator],
+            value=self.visit(node["right"]),
+        )
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
@@ -328,19 +331,20 @@ class ASTConverter:
             return [self.visit(obj)]
 
         values += parse_left(node["left"], operator)
-        # values.append(self.visit(node['left']))
         values.append(self.visit(node["right"]))
 
         return BoolOp(op=bool_ops[operator], values=values)
 
     def visit_IfStatement(self, node: dict):
-        orelse = []
-        if alternate := node.get("alternate"):
-            orelse = self.visit(alternate)
-            if not isinstance(orelse, list):
-                orelse = [orelse]
+        orelse = self.visit(node.get("alternate"), [])
+        if not isinstance(orelse, list):
+            orelse = [orelse]
 
-        return If(test=self.visit(node["test"]), body=self.visit(node["consequent"]), orelse=orelse)
+        return If(
+            test=self.visit(node["test"]),
+            body=self.visit(node["consequent"]),
+            orelse=orelse,
+        )
 
     def visit_ForInStatement(self, node: dict):
         iter_elem = Call(
@@ -365,6 +369,7 @@ class ASTConverter:
 
         body = self.visit(node["body"])
         body.append(update)
+
         return [
             init[0],
             While(
@@ -437,6 +442,7 @@ class ASTConverter:
 
     def visit_FunctionExpression(self, node: dict):
         node_body = node["body"]
+
         if len(node_body["body"]) != 1:
             func_name = "local_anonymous_func"
             if node.get("id"):
@@ -500,14 +506,10 @@ class ASTConverter:
         # it's not needed in other places and is safer that way
         # I'm thinking if maybe we should write special method for it and wrap calls
 
-        finalbody = []
-        if "finalizer" in node:
-            finalbody = self.visit(node["finalizer"])
-
         return Try(
             body=self.visit(node["block"]),
             handlers=[self.visit(node["handler"])],
-            finalbody=finalbody,
+            finalbody=self.visit(node.get("finalizer"), []),
         )
 
     def visit_CatchClause(self, node: dict):
