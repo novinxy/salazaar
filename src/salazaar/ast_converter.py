@@ -108,14 +108,13 @@ class ASTConverter:
         return Module(body=body, type_ignores=[])
 
     def visit_UpdateExpression(self, node: dict):
-        operator = node["operator"]
-        match operator:
-            case "++":
-                return AugAssign(target=self.visit(node["argument"]), op=Add(), value=Constant(value=1))
-            case "--":
-                return AugAssign(target=self.visit(node["argument"]), op=Sub(), value=Constant(value=1))
-            case _:
-                raise ValueError(f"Incorrect operator {operator}")
+        operators = {"++": Add(), "--": Sub()}
+
+        return AugAssign(
+            target=self.visit(node["argument"]),
+            op=operators[node["operator"]],
+            value=Constant(value=1),
+        )
 
     def visit_VariableDeclaration(self, node: dict):
         declarations = []
@@ -149,7 +148,11 @@ class ASTConverter:
                 if base := assigned_value.get("superClass"):
                     bases = [self.visit(base)]
 
-                return ClassDef(name=declaration["id"]["name"], bases=bases, body=self.visit(assigned_value["body"]))
+                return ClassDef(
+                    name=declaration["id"]["name"],
+                    bases=bases,
+                    body=self.visit(assigned_value["body"]),
+                )
             else:
                 value = self.visit(assigned_value)
 
