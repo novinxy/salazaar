@@ -132,29 +132,29 @@ class ASTConverter:
             targets = [Name(id=declaration["id"]["name"])]
             assigned_value = declaration.get("init", {"raw": "null", "type": "Literal", "value": "null"})
 
-            if assigned_value["type"] == "AssignmentExpression":
-                value = self.visit(assigned_value)
-                targets += value.targets
-                value = value.value
+            match assigned_value['type']:
+                case 'AssignmentExpression':
+                    value = self.visit(assigned_value)
+                    targets += value.targets
+                    value = value.value
+                case "FunctionExpression" if len(assigned_value["body"]["body"]) > 1:
+                    return FunctionDef(
+                        name=declaration["id"]["name"],
+                        args=arguments(args=[arg(p["name"]) for p in assigned_value["params"]]),
+                        body=self.visit(assigned_value["body"]),
+                    )
+                case "ClassExpression":
+                    bases = []
+                    if base := assigned_value.get("superClass"):
+                        bases = [self.visit(base)]
 
-            elif assigned_value["type"] == "FunctionExpression" and len(assigned_value["body"]["body"]) > 1:
-                return FunctionDef(
-                    name=declaration["id"]["name"],
-                    args=arguments(args=[arg(p["name"]) for p in assigned_value["params"]]),
-                    body=self.visit(assigned_value["body"]),
+                    return ClassDef(
+                        name=declaration["id"]["name"],
+                        bases=bases,
+                        body=self.visit(assigned_value["body"]),
                 )
-            elif assigned_value["type"] == "ClassExpression":
-                bases = []
-                if base := assigned_value.get("superClass"):
-                    bases = [self.visit(base)]
-
-                return ClassDef(
-                    name=declaration["id"]["name"],
-                    bases=bases,
-                    body=self.visit(assigned_value["body"]),
-                )
-            else:
-                value = self.visit(assigned_value)
+                case _:
+                    value = self.visit(assigned_value)
 
             declarations.append(
                 Assign(
