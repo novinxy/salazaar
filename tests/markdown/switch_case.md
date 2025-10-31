@@ -4,7 +4,7 @@ This file contains examples and tests for converting JavaScript `switch` stateme
 
 ---
 
-## Test case: Simple Value Matching
+## Test case: simple value matching
 
 JavaScript:
 ```js
@@ -32,17 +32,23 @@ match value:
 ```
 
 
-## Test case: Multiple Cases - Fallthrough
+## Test case: multiple cases - fallthrough
 
 JavaScript:
 ```js
 switch (color) {
     case "red":
     case "blue":
+        flag = true
+    case "yellow":
         result = "primary";
-        break;
     case "green":
-        result = "secondary";
+        sayHello();
+        break;
+    case "black":
+        flag = false
+    case "white":
+        sayHello();
         break;
     default:
         result = "unknown";
@@ -52,16 +58,30 @@ switch (color) {
 Python:
 ```py
 match color:
-    case 'red' | 'blue':
-        result = 'primary'
+    case 'red':
+        flag = True
+        result = 'Primary'
+        sayHello()
+    case 'blue':
+        flag = True
+        result = 'Primary'
+        sayHello()
+    case 'yellow':
+        result = 'Primary'
+        sayHello()
     case 'green':
-        result = 'secondary'
+        sayHello()
+    case 'black':
+        flag = False
+        sayHello()
+    case 'white':
+        sayHello()
     case _:
         result = 'unknown'
 ```
 
 
-## Test case: Switch with Expressions
+## Test case: switch with expressions
 
 JavaScript:
 ```js
@@ -84,7 +104,7 @@ match x + y:
 ```
 
 
-## Test case: No Default Case
+## Test case: no default case
 
 JavaScript:
 ```js
@@ -108,7 +128,7 @@ match status:
 ```
 
 
-## Test case: Nested Switch
+## Test case: nested switch
 
 JavaScript:
 ```js
