@@ -245,9 +245,7 @@ class ASTConverter:
         return Dict(keys=keys, values=values)
 
     def visit_AssignmentExpression(self, node: dict):
-        targets = []
-        # TODO GRNO 2025-08-14 : are we sure about this line ?
-        targets.append(self.visit(node["left"]))
+        targets = [self.visit(node["left"])]
 
         rhs = node["right"]
 
