@@ -67,14 +67,13 @@ from ast import (
 
 # pylint: disable=invalid-name
 
-
 class ASTConverter:
     def __init__(self):
         self.injected_blocks = []
 
-    def visit(self, node: dict | None) -> Any:
+    def visit(self, node: dict | None, default=None) -> Any:
         if node is None:
-            return None
+            return default
 
         node_type = node["type"]
         method = "visit_" + node_type
@@ -351,7 +350,12 @@ class ASTConverter:
 
         body = self.visit(node["body"])
 
-        return For(iter=iter_elem, target=Name(id=node["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[])
+        return For(
+            iter=iter_elem,
+            target=Name(id=node["left"]["declarations"][0]["id"]["name"]),
+            body=body,
+            orelse=[],
+        )
 
     def visit_ForStatement(self, node: dict):
         init = self.visit(node["init"])
@@ -395,7 +399,12 @@ class ASTConverter:
 
         body = self.visit(node["body"])
 
-        return For(iter=iter_elem, target=Name(id=node["left"]["declarations"][0]["id"]["name"]), body=body, orelse=[])
+        return For(
+            iter=iter_elem,
+            target=Name(id=node["left"]["declarations"][0]["id"]["name"]),
+            body=body,
+            orelse=[],
+        )
 
     def visit_WhileStatement(self, node: dict):
         test_value = self.visit(node["test"])
@@ -412,10 +421,10 @@ class ASTConverter:
     def visit_ReturnStatement(self, node: dict):
         return Return(value=self.visit(node.get("argument")))
 
-    def visit_BreakStatement(self, node: dict):
+    def visit_BreakStatement(self, _: dict):
         return Break()
 
-    def visit_ContinueStatement(self, node: dict):
+    def visit_ContinueStatement(self, _: dict):
         return Continue()
 
     def visit_ConditionalExpression(self, node: dict):
@@ -473,45 +482,41 @@ class ASTConverter:
 
     def visit_SwitchStatement(self, node: dict):
         cases = []
-        for c in node["cases"]:
-            case = self.visit_SwitchCase(c)
+        for idx, case_ in enumerate(node["cases"]):
+            pattern = self.visit(case_.get("test"), Name(id='_'))
 
-            cases.append(case)
+            all_consequent = itertools.chain.from_iterable(c["consequent"] for c in node["cases"][idx::])
+            all_cases = [self.visit(stmt) for stmt in all_consequent]
 
-        for c in cases:
-            if c.body and isinstance(c.body[-1], Break):
-                c.body.pop()
+            body = list(itertools.takewhile(lambda c: not isinstance(c, Break), all_cases))
+
+            cases.append(match_case(pattern=pattern, body=body))
 
         return Match(subject=self.visit(node["discriminant"]), cases=cases)
-
-    def visit_SwitchCase(self, node: dict):
-        pattern = Name(id="_")
-        if "test" in node:
-            pattern = self.visit(node["test"])
-
-        return match_case(pattern=pattern, body=[self.visit(c) for c in node["consequent"]])
 
     def visit_TryStatement(self, node: dict):
         # somehow bodies in here work strange as they are missing Expression for CallExpressions
         # it's not needed in other places and is safer that way
         # I'm thinking if maybe we should write special method for it and wrap calls
 
-        result = Try(
+        finalbody = []
+        if "finalizer" in node:
+            finalbody = self.visit(node["finalizer"])
+
+        return Try(
             body=self.visit(node["block"]),
             handlers=[self.visit(node["handler"])],
+            finalbody=finalbody,
         )
-
-        if "finalizer" in node:
-            result.finalbody = self.visit(node["finalizer"])
-
-        return result
 
     def visit_CatchClause(self, node: dict):
         # somehow bodies in here work strange as they are missing Expression for CallExpressions
         # it's not needed in other places and is safer that way
         # I'm thinking if maybe we should write special method for it and wrap calls
         return ExceptHandler(
-            type=Name(id="Exception"), name=node["param"]["name"], body=[self.visit(b) for b in node["body"]["body"]]
+            type=Name(id="Exception"),
+            name=node["param"]["name"],
+            body=[self.visit(b) for b in node["body"]["body"]],
         )
 
     def visit_ThrowStatement(self, node: dict):
@@ -562,20 +567,22 @@ class ASTConverter:
         if node["kind"] != "constructor":
             func_name = node["key"]["name"]
 
-        return FunctionDef(name=func_name, args=arguments(args=params), body=body, decorator_list=decorators)
+        return FunctionDef(
+            name=func_name,
+            args=arguments(args=params),
+            body=body,
+            decorator_list=decorators,
+        )
 
-
-    def visit_ThisExpression(self, node: dict):
+    def visit_ThisExpression(self, _: dict):
         return Name(id="self")
 
-    def visit_Super(self, node: dict):
+    def visit_Super(self, _: dict):
         return Call(func=Name(id="super"))
 
     def visit_TemplateLiteral(self, node: dict):
         if not node["expressions"]:
-            value = Constant(
-                value=node["quasis"][0]['value']['raw']
-            )
+            value = Constant(value=node["quasis"][0]["value"]["raw"])
             return value
 
         joined_str = []

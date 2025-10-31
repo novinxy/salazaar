@@ -60,14 +60,14 @@ Python:
 match color:
     case 'red':
         flag = True
-        result = 'Primary'
+        result = 'primary'
         sayHello()
     case 'blue':
         flag = True
-        result = 'Primary'
+        result = 'primary'
         sayHello()
     case 'yellow':
-        result = 'Primary'
+        result = 'primary'
         sayHello()
     case 'green':
         sayHello()
