@@ -67,6 +67,7 @@ from ast import (
 
 # pylint: disable=invalid-name
 
+
 class ASTConverter:
     def __init__(self):
         self.injected_blocks = []
@@ -483,7 +484,7 @@ class ASTConverter:
     def visit_SwitchStatement(self, node: dict):
         cases = []
         for idx, case_ in enumerate(node["cases"]):
-            pattern = self.visit(case_.get("test"), Name(id='_'))
+            pattern = self.visit(case_.get("test"), Name(id="_"))
 
             all_consequent = itertools.chain.from_iterable(c["consequent"] for c in node["cases"][idx::])
             all_cases = [self.visit(stmt) for stmt in all_consequent]
@@ -535,6 +536,7 @@ class ASTConverter:
                 if asname == module_name:
                     asname = None
                 return Import(names=[alias(name=module_name, asname=asname)])
+
             return ImportFrom(
                 module=module_name,
                 names=[alias(name=s["local"]["name"]) for s in node["specifiers"]],
@@ -593,6 +595,3 @@ class ASTConverter:
                 joined_str.append(FormattedValue(value=self.visit(expression), conversion=-1))
 
         return JoinedStr(values=joined_str)
-
-    def visit_TemplateElement(self, node: dict):
-        return node["value"]["raw"]
