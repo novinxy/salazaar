@@ -249,23 +249,7 @@ class ASTConverter:
 
         rhs = node["right"]
 
-        operator_ = node["operator"]
-
-        if operator_ == "=":
-            # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
-            while rhs["type"] == "AssignmentExpression":
-                targets.append(self.visit(rhs["left"]))
-
-                rhs = rhs["right"]
-
-            value = self.visit(rhs)
-
-            if isinstance(value, list):
-                raise ValueError("Value on the assign shouldn't be list", value)
-
-            return Assign(targets=targets, value=value)
-
-        operators = {
+        operators: dict[str, Any] = {
             "+=": Add(),
             "-=": Sub(),
             "*=": Mult(),
@@ -276,13 +260,30 @@ class ASTConverter:
             "|=": BitOr(),
             "^=": BitXor(),
             "&=": BitAnd(),
+            "=": Eq()
         }
 
-        return AugAssign(
-            target=self.visit(node["left"]),
-            op=operators[operator_],
-            value=self.visit(node["right"]),
-        )
+        operator_ = operators[node["operator"]]
+        if not isinstance(operator_, Eq):
+            return AugAssign(
+                target=self.visit(node["left"]),
+                op=operator_,
+                value=self.visit(rhs),
+            )
+
+        # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
+        while rhs["type"] == "AssignmentExpression":
+            targets.append(self.visit(rhs["left"]))
+
+            rhs = rhs["right"]
+
+        value = self.visit(rhs)
+
+        if isinstance(value, list):
+            raise ValueError("Value on the assign shouldn't be list", value)
+
+        return Assign(targets=targets, value=value)
+
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
