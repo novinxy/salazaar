@@ -245,10 +245,6 @@ class ASTConverter:
         return Dict(keys=keys, values=values)
 
     def visit_AssignmentExpression(self, node: dict):
-        targets = [self.visit(node["left"])]
-
-        rhs = node["right"]
-
         operators: dict[str, Any] = {
             "+=": Add(),
             "-=": Sub(),
@@ -268,10 +264,13 @@ class ASTConverter:
             return AugAssign(
                 target=self.visit(node["left"]),
                 op=operator_,
-                value=self.visit(rhs),
+                value=self.visit(node['right']),
             )
 
         # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
+        targets = [self.visit(node["left"])]
+        rhs = node["right"]
+
         while rhs["type"] == "AssignmentExpression":
             targets.append(self.visit(rhs["left"]))
 
