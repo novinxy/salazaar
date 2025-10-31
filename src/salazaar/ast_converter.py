@@ -70,6 +70,43 @@ from ast import (
 # pylint: disable=invalid-name
 
 
+operators: dict[str, Any] = {
+    "==": Eq(),
+    "!=": NotEq(),
+    "===": Eq(),
+    "!==": NotEq(),
+    ">": Gt(),
+    ">=": GtE(),
+    "<": Lt(),
+    "<=": LtE(),
+    "+": Add(),
+    "-": Sub(),
+    "*": Mult(),
+    "/": Div(),
+    "%": Mod(),
+    "**": Pow(),
+    "<<": LShift(),
+    ">>": RShift(),
+    "|": BitOr(),
+    "^": BitXor(),
+    "&": BitAnd(),
+    "++": Add(),
+    "--": Sub(),
+    "+=": Add(),
+    "-=": Sub(),
+    "*=": Mult(),
+    "/=": Div(),
+    "%=": Mod(),
+    "<<=": LShift(),
+    ">>=": RShift(),
+    "|=": BitOr(),
+    "^=": BitXor(),
+    "&=": BitAnd(),
+    "&&": And(),
+    "||": Or(),
+}
+
+
 class ASTConverter:
     def __init__(self):
         self.injected_blocks = []
@@ -101,6 +138,7 @@ class ASTConverter:
             if not isinstance(n, list):
                 n = [n]
 
+            # TODO novinxy: maybe instead of simple appends we should provide simple function ?
             if self.injected_blocks:
                 body += self.injected_blocks
                 self.injected_blocks = []
@@ -110,8 +148,6 @@ class ASTConverter:
         return Module(body=body, type_ignores=[])
 
     def visit_UpdateExpression(self, node: dict):
-        operators = {"++": Add(), "--": Sub()}
-
         return AugAssign(
             target=self.visit(node["argument"]),
             op=operators[node["operator"]],
@@ -134,8 +170,8 @@ class ASTConverter:
             targets = [Name(id=declaration["id"]["name"])]
             assigned_value = declaration.get("init", {"raw": "null", "type": "Literal", "value": "null"})
 
-            match assigned_value['type']:
-                case 'AssignmentExpression':
+            match assigned_value["type"]:
+                case "AssignmentExpression":
                     value = self.visit(assigned_value)
                     targets += value.targets
                     value = value.value
@@ -154,7 +190,7 @@ class ASTConverter:
                         name=declaration["id"]["name"],
                         bases=bases,
                         body=self.visit(assigned_value["body"]),
-                )
+                    )
                 case _:
                     value = self.visit(assigned_value)
 
@@ -189,28 +225,6 @@ class ASTConverter:
         return self.visit(node["expression"])
 
     def visit_BinaryExpression(self, node: dict):
-        operators: dict[str, Any] = {
-            "==": Eq(),
-            "!=": NotEq(),
-            "===": Eq(),
-            "!==": NotEq(),
-            ">": Gt(),
-            ">=": GtE(),
-            "<": Lt(),
-            "<=": LtE(),
-            "+": Add(),
-            "-": Sub(),
-            "*": Mult(),
-            "/": Div(),
-            "%": Mod(),
-            "**": Pow(),
-            "<<": LShift(),
-            ">>": RShift(),
-            "|": BitOr(),
-            "^": BitXor(),
-            "&": BitAnd(),
-        }
-
         operator_ = node["operator"]
         left = self.visit(node["left"])
         right = self.visit(node["right"])
@@ -245,26 +259,12 @@ class ASTConverter:
         return Dict(keys=keys, values=values)
 
     def visit_AssignmentExpression(self, node: dict):
-        operators: dict[str, Any] = {
-            "+=": Add(),
-            "-=": Sub(),
-            "*=": Mult(),
-            "/=": Div(),
-            "%=": Mod(),
-            "<<=": LShift(),
-            ">>=": RShift(),
-            "|=": BitOr(),
-            "^=": BitXor(),
-            "&=": BitAnd(),
-            "=": Eq()
-        }
-
-        operator_ = operators[node["operator"]]
-        if not isinstance(operator_, Eq):
+        operator_ = operators.get(node["operator"], None)
+        if operator_ is not None:
             return AugAssign(
                 target=self.visit(node["left"]),
                 op=operator_,
-                value=self.visit(node['right']),
+                value=self.visit(node["right"]),
             )
 
         # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
@@ -282,7 +282,6 @@ class ASTConverter:
             raise ValueError("Value on the assign shouldn't be list", value)
 
         return Assign(targets=targets, value=value)
-
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
@@ -317,11 +316,6 @@ class ASTConverter:
 
     def visit_LogicalExpression(self, node: dict):
         # TODO GRNO 2025-08-14 : hate this function. We should quickly fix this one
-
-        bool_ops = {"&&": And(), "||": Or()}
-
-        operator_ = node["operator"]
-
         values = []
 
         def parse_left(obj, op):
@@ -333,10 +327,11 @@ class ASTConverter:
 
             return [self.visit(obj)]
 
+        operator_ = node["operator"]
         values += parse_left(node["left"], operator_)
         values.append(self.visit(node["right"]))
 
-        return BoolOp(op=bool_ops[operator_], values=values)
+        return BoolOp(op=operators[operator_], values=values)
 
     def visit_IfStatement(self, node: dict):
         orelse = self.visit(node.get("alternate"), [])
@@ -404,14 +399,10 @@ class ASTConverter:
         return Attribute(value=value, attr=node["property"]["name"])
 
     def visit_ForOfStatement(self, node: dict):
-        iter_elem = self.visit(node["right"])
-
-        body = self.visit(node["body"])
-
         return For(
-            iter=iter_elem,
+            iter=self.visit(node["right"]),
             target=Name(id=node["left"]["declarations"][0]["id"]["name"]),
-            body=body,
+            body=self.visit(node["body"]),
             orelse=[],
         )
 
@@ -451,6 +442,7 @@ class ASTConverter:
             if node.get("id"):
                 func_name = node["id"]["name"]
 
+            # TODO novinxy: instead of of append add some simple abstraction
             self.injected_blocks.append(
                 FunctionDef(
                     name=func_name,
@@ -460,9 +452,8 @@ class ASTConverter:
             )
 
             return Name(id=func_name)
-        body = node_body["body"][0]
 
-        body = self.visit(body)
+        body = self.visit(node_body["body"][0])
 
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
