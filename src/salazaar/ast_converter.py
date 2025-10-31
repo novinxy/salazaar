@@ -407,16 +407,19 @@ class ASTConverter:
         )
 
     def visit_WhileStatement(self, node: dict):
-        test_value = self.visit(node["test"])
-        body = self.visit(node["body"])
-
-        return While(test=test_value, body=body, orelse=[])
+        return While(
+            test=self.visit(node["test"]),
+            body=self.visit(node["body"]),
+            orelse=[],
+        )
 
     def visit_DoWhileStatement(self, node: dict):
-        test_value = self.visit(node["test"])
         body = self.visit(node["body"])
 
-        return [body, While(test=test_value, body=body, orelse=[])]
+        return [
+            body,
+            While(test=self.visit(node["test"]), body=body, orelse=[]),
+        ]
 
     def visit_ReturnStatement(self, node: dict):
         return Return(value=self.visit(node.get("argument")))
@@ -458,7 +461,10 @@ class ASTConverter:
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
 
-        return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=body)
+        return Lambda(
+            args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+            body=body,
+        )
 
     def visit_ArrowFunctionExpression(self, node: dict):
         body = node["body"]
@@ -479,7 +485,10 @@ class ASTConverter:
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
 
-        return Lambda(args=arguments(args=[arg(p["name"]) for p in node["params"]]), body=body)
+        return Lambda(
+            args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+            body=body,
+        )
 
     def visit_SwitchStatement(self, node: dict):
         cases = []
@@ -526,20 +535,21 @@ class ASTConverter:
     def visit_ImportDeclaration(self, node: dict):
         module_name = node["source"]["value"].split(".")[0].replace("/", ".")
 
-        if node["specifiers"]:
-            if node["specifiers"][0]["type"] == "ImportNamespaceSpecifier":
-                asname = node["specifiers"][0]["local"]["name"]
-                if asname == module_name:
-                    asname = None
-                return Import(names=[alias(name=module_name, asname=asname)])
+        if not node["specifiers"]:
+            return Import(names=[alias(name=module_name)])
 
-            return ImportFrom(
-                module=module_name,
-                names=[alias(name=s["local"]["name"]) for s in node["specifiers"]],
-                level=0,
-            )
+        if node["specifiers"][0]["type"] == "ImportNamespaceSpecifier":
+            asname = node["specifiers"][0]["local"]["name"]
+            if asname == module_name:
+                asname = None
+            return Import(names=[alias(name=module_name, asname=asname)])
 
-        return Import(names=[alias(name=module_name)])
+        return ImportFrom(
+            module=module_name,
+            names=[alias(name=s["local"]["name"]) for s in node["specifiers"]],
+            level=0,
+        )
+
 
     def visit_ClassDeclaration(self, node: dict):
         bases = []
