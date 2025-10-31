@@ -1,6 +1,7 @@
 from typing import Any
 import itertools
 from ast import (
+    operator,
     ClassDef,
     FormattedValue,
     JoinedStr,
@@ -60,6 +61,7 @@ from ast import (
     While,
     arg,
     arguments,
+    cmpop,
     expr,
     match_case,
 )
@@ -187,7 +189,7 @@ class ASTConverter:
         return self.visit(node["expression"])
 
     def visit_BinaryExpression(self, node: dict):
-        operators_mapping: dict[str, Any] = {
+        operators: dict[str, Any] = {
             "==": Eq(),
             "!=": NotEq(),
             "===": Eq(),
@@ -209,21 +211,21 @@ class ASTConverter:
             "&": BitAnd(),
         }
 
-        operator = node["operator"]
+        operator_ = node["operator"]
         left = self.visit(node["left"])
         right = self.visit(node["right"])
 
-        match operator:
-            case "==" | "!=" | "===" | "!==" | ">" | ">=" | "<" | "<=":
-                return Compare(left=left, ops=[operators_mapping[operator]], comparators=[right])
-            case "+" | "-" | "*" | "/" | "%" | "**" | "<<" | ">>" | "|" | "^" | "&":
-                return BinOp(op=operators_mapping[operator], left=left, right=right)
+        match operators.get(operator_, operator_):
+            case cmpop():
+                return Compare(left=left, ops=[operators[operator_]], comparators=[right])
+            case operator():
+                return BinOp(op=operators[operator_], left=left, right=right)
             case "in":
                 return Call(func=Name("hasattr"), args=[right, left], keywords=[])
             case "instanceof":
                 return Call(func=Name("isinstance"), args=[left, right], keywords=[])
             case _:
-                raise ValueError(f"Incorrect operator: {operator}")
+                raise ValueError(f"Incorrect operator: {operator_}")
 
     def visit_CallExpression(self, node: dict):
         args = [self.visit(arg) for arg in node["arguments"]]
@@ -249,9 +251,9 @@ class ASTConverter:
 
         rhs = node["right"]
 
-        operator = node["operator"]
+        operator_ = node["operator"]
 
-        if operator == "=":
+        if operator_ == "=":
             # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
             while rhs["type"] == "AssignmentExpression":
                 targets.append(self.visit(rhs["left"]))
@@ -280,7 +282,7 @@ class ASTConverter:
 
         return AugAssign(
             target=self.visit(node["left"]),
-            op=operators[operator],
+            op=operators[operator_],
             value=self.visit(node["right"]),
         )
 
@@ -320,12 +322,12 @@ class ASTConverter:
 
         bool_ops = {"&&": And(), "||": Or()}
 
-        operator = node["operator"]
+        operator_ = node["operator"]
 
         values = []
 
-        def parse_left(obj, operator):
-            if obj["type"] == "LogicalExpression" and operator == obj["operator"]:
+        def parse_left(obj, op):
+            if obj["type"] == "LogicalExpression" and op == obj["operator"]:
                 values1 = []
                 values1 += parse_left(obj["left"], obj["operator"])
                 values1.append(self.visit(obj["right"]))
@@ -333,10 +335,10 @@ class ASTConverter:
 
             return [self.visit(obj)]
 
-        values += parse_left(node["left"], operator)
+        values += parse_left(node["left"], operator_)
         values.append(self.visit(node["right"]))
 
-        return BoolOp(op=bool_ops[operator], values=values)
+        return BoolOp(op=bool_ops[operator_], values=values)
 
     def visit_IfStatement(self, node: dict):
         orelse = self.visit(node.get("alternate"), [])
@@ -383,9 +385,9 @@ class ASTConverter:
         ]
 
     def visit_UnaryExpression(self, node: dict):
-        operator = {"-": USub(), "~": Invert(), "!": Not()}[node["operator"]]
+        op = {"-": USub(), "~": Invert(), "!": Not()}[node["operator"]]
 
-        return UnaryOp(op=operator, operand=self.visit(node["argument"]))
+        return UnaryOp(op=op, operand=self.visit(node["argument"]))
 
     def visit_ArrayExpression(self, node: dict):
         elements = [self.visit(e) for e in node["elements"]]
