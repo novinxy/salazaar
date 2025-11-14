@@ -3,7 +3,6 @@ import re
 
 import itertools
 from ast import (
-    AST,
     operator,
     ClassDef,
     FormattedValue,
@@ -69,12 +68,7 @@ from ast import (
     match_case,
 )
 
-class RawString(AST):
-    def __init__(self, value: str) -> None:
-        self.value: str = value
-        super().__init__()
-
-
+from salazaar.ext_types import RawString
 
 # pylint: disable=invalid-name
 
