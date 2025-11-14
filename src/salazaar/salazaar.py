@@ -12,10 +12,21 @@ def get_js_ast(js_code: str) -> dict:
     return data.toDict()
 
 
+
+import types
 def translate_code(js_code: str) -> str:
     js_ast = get_js_ast(js_code)
 
     py_ast = ASTConverter().visit(js_ast)
+
+    def visit_const(self, node):
+        self.write(f"r'{node.value}'")
+        
+    unparser = ast._Unparser()
+    unparser.visit_RawString = types.MethodType(visit_const, unparser)
+
+    return unparser.visit(ast.fix_missing_locations(py_ast))
+
     return ast.unparse(ast.fix_missing_locations(py_ast))
 
 

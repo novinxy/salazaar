@@ -1,6 +1,9 @@
 from typing import Any
+import re
+
 import itertools
 from ast import (
+    AST,
     operator,
     ClassDef,
     FormattedValue,
@@ -65,6 +68,12 @@ from ast import (
     expr,
     match_case,
 )
+
+class RawString(AST):
+    def __init__(self, value: str) -> None:
+        self.value: str = value
+        super().__init__()
+
 
 
 # pylint: disable=invalid-name
@@ -203,11 +212,14 @@ class ASTConverter:
 
         return declarations
 
-    def visit_Literal(self, node: dict) -> Constant:
+    def visit_Literal(self, node: dict) -> Constant| RawString:
         value = node.get("value", "null")
         if value in ("undefined", "null"):
             return Constant(value=None)
 
+        if isinstance(value, re.Pattern):
+            
+            return RawString(value=value.pattern)
         return Constant(value=value)
 
     def visit_Identifier(self, node: dict) -> expr:

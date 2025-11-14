@@ -1,15 +1,10 @@
-write some nice tests for string operations
-
-## Test case: fail this test
+## Test case: literal with regex initialization
 JavaScript:
 ```js
-while (true) {
-    var i = 10;
-}
+const regex = /ab+c/;
 ```
 
 Python:
 ```py
-while False:
-    i = 10
+regex = r'ab+c'
 ```
