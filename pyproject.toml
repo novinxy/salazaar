@@ -1,6 +1,5 @@
 [project]
 name = "salazaar"
-version = "0.1.0"
 description = "salaazaar is a library for transpiling JavaScript code to Python code."
 authors = [
     { name = "Grzegorz Nowiński", email = "grzesiekn1001@gmail.com"}
@@ -8,6 +7,8 @@ authors = [
 license = "MIT"
 license-files = [ "LICENSE" ]
 readme = "README.md"
+dynamic = ["version"]
+
 requires-python = ">=3.13"
 dependencies = [
     "esprima",
@@ -30,6 +31,9 @@ Source = 'https://github.com/novinxy/salazaar'
 
 [tool.ruff]
 line-length = 120
+
+[tool.hatch.version]
+path = "src/salazaar/__init__.py"
 
 [project.scripts]
 get-ast = "salazaar.tools.get_ast:main"

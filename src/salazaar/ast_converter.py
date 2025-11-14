@@ -550,13 +550,16 @@ class ASTConverter:
             level=0,
         )
 
-
     def visit_ClassDeclaration(self, node: dict):
         bases = []
         if base := node.get("superClass"):
             bases = [self.visit(base)]
 
-        return ClassDef(name=node["id"]["name"], bases=bases, body=self.visit(node["body"]))
+        return ClassDef(
+            name=node["id"]["name"],
+            bases=bases,
+            body=self.visit(node["body"]),
+        )
 
     def visit_ClassBody(self, node: dict):
         return [self.visit(n) for n in node["body"]]
