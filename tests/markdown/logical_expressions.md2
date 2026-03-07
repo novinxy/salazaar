@@ -156,3 +156,15 @@ if False or not True and False or False:
 ```
 
 
+## Test case: mixed operators3
+JavaScript:
+```js
+var1 && (var2 && var3)
+```
+
+Python:
+```py
+var1 and (var2 and var3)
+```
+
+
