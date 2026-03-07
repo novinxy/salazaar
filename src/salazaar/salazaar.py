@@ -8,7 +8,7 @@ from salazaar.parser import Parser
 
 
 def get_js_ast(js_code: str) -> dict:
-    data = esprima.parseModule(js_code)
+    data = esprima.parseModule(js_code, options={"comment": True, "attachComment": True, "tokens": True, "loc": True, "range": True})
     return data.toDict()
 
 
