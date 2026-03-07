@@ -50,6 +50,11 @@ switch (color) {
     case "white":
         sayHello();
         break;
+    case "white":
+        flag = false
+    case "black":
+        result = "fail";
+        break;
     default:
         result = "unknown";
 }
