@@ -42,6 +42,17 @@ Python:
 collection.append(1)
 ```
 
+## Test case: array push multiple values
+JavaScript:
+```js
+collection.push(1, 2, 3, 4)
+```
+
+Python:
+```py
+collection.extend([1, 2, 3, 4])
+```
+
 ## Test case: array concat
 JavaScript:
 ```js

@@ -212,7 +212,7 @@ class ASTConverter:
             return Constant(value=None)
 
         if isinstance(value, re.Pattern):
-            
+
             return RawString(value=value.pattern)
         return Constant(value=value)
 
@@ -254,6 +254,7 @@ class ASTConverter:
 
         if callee["type"] == "Super":
             return Call(func=Attribute(value=Call(func=Name(id="super")), attr="__init__"))
+
         if callee["type"] == "MemberExpression":
             if callee["property"]["name"] == "concat":
                 def concat(argNum):
@@ -264,13 +265,22 @@ class ASTConverter:
                             op=Add(),
                             right=args[argNum],
                         )
-                    
+
                     return BinOp(
                         left=concat(argNum),
                         op=Add(),
                         right=args[argNum],
                     )
                 return concat(len(args))
+            
+            if callee["property"]["name"]  == "push":
+                if len(args) <= 1:
+                    return Call(func=Attribute(
+                        value=self.visit(callee['object']), attr='append'), args=args)
+                else:
+                    return Call(func=Attribute(
+                        value=self.visit(callee['object']), attr='extend'), args=[List(elts=args)])
+                    
 
         func = self.visit(callee)
 
@@ -418,9 +428,6 @@ class ASTConverter:
         if node["property"]["name"] == "length":
             params = [self.visit(node["object"])]
             return Call(func=Name(id="len"), args=params)
-        
-        if node["property"]["name"] == "push":
-            return Attribute(value=value, attr='append')
 
         return Attribute(value=value, attr=node["property"]["name"])
 
