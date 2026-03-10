@@ -30,3 +30,14 @@ Python:
 ```py
 len(parent.child.collection)
 ```
+
+## Test case: array push
+JavaScript:
+```js
+collection.push(1)
+```
+
+Python:
+```py
+collection.append(1)
+```

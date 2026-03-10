@@ -401,6 +401,9 @@ class ASTConverter:
         if node["property"]["name"] == "length":
             params = [self.visit(node["object"])]
             return Call(func=Name(id="len"), args=params)
+        
+        if node["property"]["name"] == "push":
+            return Attribute(value=value, attr='append')
 
         return Attribute(value=value, attr=node["property"]["name"])
 
