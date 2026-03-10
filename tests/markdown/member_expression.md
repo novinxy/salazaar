@@ -74,3 +74,25 @@ Python:
 ```py
 hello().world('greet').say(True)
 ```
+
+## Test case: deeply nested member
+JavaScript:
+```js
+grandparent.parent.child.grandchild
+```
+
+Python:
+```py
+grandparent.parent.child.grandchild
+```
+
+## Test case: deeply nested member with call
+JavaScript:
+```js
+grandparent.parent.child.grandchild.greet()
+```
+
+Python:
+```py
+grandparent.parent.child.grandchild.greet()
+```

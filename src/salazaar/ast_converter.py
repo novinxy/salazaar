@@ -399,7 +399,7 @@ class ASTConverter:
             return Subscript(value=value, slice=self.visit(node["property"]))
 
         if node["property"]["name"] == "length":
-            params = [Name(id=node["object"]["name"])]
+            params = [self.visit(node["object"])]
             return Call(func=Name(id="len"), args=params)
 
         return Attribute(value=value, attr=node["property"]["name"])
