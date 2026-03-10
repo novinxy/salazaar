@@ -41,3 +41,25 @@ Python:
 ```py
 collection.append(1)
 ```
+
+## Test case: array concat
+JavaScript:
+```js
+var newCollection = collection.concat(secondCollection)
+```
+
+Python:
+```py
+newCollection = collection + secondCollection
+```
+
+## Test case: concat multiple arrays
+JavaScript:
+```js
+var newCollection = collection.concat(secondCollection, thirdCollection, col)
+```
+
+Python:
+```py
+newCollection = collection + secondCollection + thirdCollection + col
+```

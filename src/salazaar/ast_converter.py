@@ -254,6 +254,23 @@ class ASTConverter:
 
         if callee["type"] == "Super":
             return Call(func=Attribute(value=Call(func=Name(id="super")), attr="__init__"))
+        if callee["type"] == "MemberExpression":
+            if callee["property"]["name"] == "concat":
+                def concat(argNum):
+                    argNum -= 1
+                    if argNum == 0:
+                        return BinOp(
+                            left=self.visit(callee["object"]),
+                            op=Add(),
+                            right=args[argNum],
+                        )
+                    
+                    return BinOp(
+                        left=concat(argNum),
+                        op=Add(),
+                        right=args[argNum],
+                    )
+                return concat(len(args))
 
         func = self.visit(callee)
 
