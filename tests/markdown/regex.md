@@ -6,7 +6,18 @@ const regex = /ab+c/;
 
 Python:
 ```py
-regex = r'ab+c'
+regex = re.compile(r'ab+c')
+```
+
+## Test case: new regex by constructor
+JavaScript:
+```js
+const regex =  new RegExp("ab+c");
+```
+
+Python:
+```py
+regex = re.compile(r'ab+c')
 ```
 
 Add following tests:

@@ -207,6 +207,13 @@ class ASTConverter:
         return declarations
 
     def visit_Literal(self, node: dict) -> Constant| RawString:
+        if 'regex' in node:
+            return Call(func=Attribute(
+                value=Name(id="re"), attr="compile"),
+                args=[RawString(value=node["regex"]["pattern"])],
+                keywords=[]
+            )
+        
         value = node.get("value", "null")
         if value in ("undefined", "null"):
             return Constant(value=None)
@@ -637,3 +644,11 @@ class ASTConverter:
                 joined_str.append(FormattedValue(value=self.visit(expression), conversion=-1))
 
         return JoinedStr(values=joined_str)
+
+    def visit_NewExpression(self, node: dict):
+        if node['callee']['name'] == 'RegExp':
+            return Call(func=Attribute(
+                value=Name(id="re"), attr="compile"),
+                args=[RawString(value=node["arguments"][0]["value"])],
+                keywords=[]
+            )
