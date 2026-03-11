@@ -647,8 +647,13 @@ class ASTConverter:
 
     def visit_NewExpression(self, node: dict):
         if node['callee']['name'] == 'RegExp':
+            
+            regexp_value = self.visit(node["arguments"][0])
+            if node["arguments"][0]["type"] == "Literal":
+                regexp_value = RawString(value=node["arguments"][0]['value'])
+            
             return Call(func=Attribute(
                 value=Name(id="re"), attr="compile"),
-                args=[RawString(value=node["arguments"][0]["value"])],
+                args=[regexp_value],
                 keywords=[]
             )
