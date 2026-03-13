@@ -1,4 +1,17 @@
-## Test case: simple comment
+## Test case: inline comment
+JavaScript:
+```js
+
+let value = "hello" // simple comment
+```
+
+Python:
+```py
+
+value = 'hello' # simple comment
+```
+
+## Test case: leading comment
 JavaScript:
 ```js
 // simple comment
