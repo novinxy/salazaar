@@ -5,12 +5,12 @@ from salazaar.ext_types import RawString, Comment
 
 class Parser(Unparser):
     def visit_RawString(self, raw_string: RawString):
-
-        super().write(f"r'{raw_string.value}'")
+        self.write(f"r'{raw_string.value}'")
 
     def visit_Comment(self, comment: Comment):
 
-        super().write(f"#{comment.value}")
+        self.maybe_newline()
+        self.write(f"# {comment.value.strip()}")
 
 
         # visit_expr = getattr(super(), f"visit_{expr_type}")

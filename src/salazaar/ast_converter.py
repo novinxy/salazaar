@@ -127,13 +127,18 @@ class ASTConverter:
             raise NotImplementedError(f'Method "{method}"" is not implemented')
 
         if 'leadingComments' in node:
-            comment = node['leadingComments'][0]['value']
+            leading_comments: list[dict] = node['leadingComments']
+            comments = []
+            for comment in leading_comments:
+                if comment['type'] == 'Block':
+                    comments += [Comment(value=c) for c in comment['value'].splitlines()]
+                else:
+                    comments += [Comment(value=comment['value'])]
             res = visitor(node)
             if isinstance(res, list):
-                res.insert(0, Comment(value=comment))
-                return res
+                return comments + res
             else:
-                return [Comment(value=comment), res]
+                return comments + [res]
         else:
             return visitor(node)
 
