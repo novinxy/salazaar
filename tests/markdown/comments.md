@@ -71,6 +71,8 @@ let value = "hello"
 /* function hello
 returns "hello" */
 function hello() {
+
+    // inner comment
     return "Hello"
 }
 ```
@@ -83,5 +85,7 @@ value = 'hello'
 # function hello
 # returns "hello"
 def hello():
+
+    # inner comment
     return 'Hello'
 ```
