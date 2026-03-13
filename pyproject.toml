@@ -32,6 +32,16 @@ Source = 'https://github.com/novinxy/salazaar'
 [tool.ruff]
 line-length = 120
 
+[tool.lint.ruff]
+preview = true
+selected-extended = [
+    "ARG",
+    "B",
+    "I",
+    "N",
+    "PERF"
+]
+
 [tool.hatch.version]
 path = "src/salazaar/__init__.py"
 

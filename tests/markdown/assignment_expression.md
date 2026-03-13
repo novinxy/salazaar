@@ -2,11 +2,13 @@
 JavaScript:
 ```js
 flag = true
+flag1 = true
 ```
 
 Python:
 ```py
 flag = True
+flag1 = True
 ```
 
 ## Test case: increment assignment expression

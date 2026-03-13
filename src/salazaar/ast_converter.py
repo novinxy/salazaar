@@ -68,7 +68,7 @@ from ast import (
     match_case,
 )
 
-from salazaar.ext_types import RawString
+from salazaar.ext_types import RawString, Comment
 
 # pylint: disable=invalid-name
 
@@ -118,14 +118,24 @@ class ASTConverter:
         if node is None:
             return default
 
-        node_type = node["type"]
-        method = "visit_" + node_type
+        method = f"visit_{node["type"]}"
         visitor = getattr(self, method)
+
+
 
         if visitor is None:
             raise NotImplementedError(f'Method "{method}"" is not implemented')
 
-        return visitor(node)
+        if 'leadingComments' in node:
+            comment = node['leadingComments'][0]['value']
+            res = visitor(node)
+            if isinstance(res, list):
+                res.insert(0, Comment(value=comment))
+                return res
+            else:
+                return [Comment(value=comment), res]
+        else:
+            return visitor(node)
 
     def visit_EmptyStatement(self, _: dict):
         return None
