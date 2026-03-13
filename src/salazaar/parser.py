@@ -1,8 +1,9 @@
 import ast
+from _ast_unparse import Unparser
 
 from salazaar.ext_types import RawString
 
-class Parser(ast._Unparser):
+class Parser(Unparser):
     def visit_RawString(self, node: RawString):
 
         super().write(f"r'{node.value}'")
