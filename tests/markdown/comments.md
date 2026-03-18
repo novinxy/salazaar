@@ -81,11 +81,10 @@ Python:
 ```py
 # simple comment
 value = 'hello'
-
 # function hello
 # returns "hello"
-def hello():
 
-    # inner comment
+def hello():
+# inner comment
     return 'Hello'
 ```
