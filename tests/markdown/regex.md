@@ -59,10 +59,42 @@ r = re.compile(r'\d+')
 m = r.search('abc123') is not None
 ```
 
+
+## Test case: matchAll
+JavaScript:
+```js
+const regexp = /\d+/g;
+const text = "test1test2";
+
+const array = text.matchAll(regexp);
+```
+
+Python:
+```py
+regexp = re.compile(r'\d+')
+text = 'test1test2'
+
+array = regexp.finditer(text)
+```
+
+## Test case: match
+JavaScript:
+```js
+const regexp = /\d+/g;
+const text = "test1test2";
+
+const array = text.match(regexp);
+```
+
+Python:
+```py
+regexp = re.compile(r'\d+')
+text = 'test1test2'
+
+array = regexp.findall(text)
+```
+
 Add following tests:
-- call find
-- call match
-- call findall
 - define capture groups
 - define named capture groups
 - mix of regex, \d + [] + groups
