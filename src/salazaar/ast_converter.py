@@ -118,22 +118,20 @@ class ASTConverter:
         if node is None:
             return default
 
-        method = f"visit_{node["type"]}"
+        method = f"visit_{node['type']}"
         visitor = getattr(self, method)
-
-
 
         if visitor is None:
             raise NotImplementedError(f'Method "{method}"" is not implemented')
 
-        if 'leadingComments' in node:
-            leading_comments: list[dict] = node['leadingComments']
+        if "leadingComments" in node:
+            leading_comments: list[dict] = node["leadingComments"]
             comments = []
             for comment in leading_comments:
-                if comment['type'] == 'Block':
-                    comments += [Comment(value=c) for c in comment['value'].splitlines()]
+                if comment["type"] == "Block":
+                    comments += [Comment(value=c) for c in comment["value"].splitlines()]
                 else:
-                    comments += [Comment(value=comment['value'])]
+                    comments += [Comment(value=comment["value"])]
             res = visitor(node)
             if isinstance(res, list):
                 return comments + res
@@ -221,20 +219,19 @@ class ASTConverter:
 
         return declarations
 
-    def visit_Literal(self, node: dict) -> Constant| RawString:
-        if 'regex' in node:
-            return Call(func=Attribute(
-                value=Name(id="re"), attr="compile"),
+    def visit_Literal(self, node: dict) -> Constant | RawString:
+        if "regex" in node:
+            return Call(
+                func=Attribute(value=Name(id="re"), attr="compile"),
                 args=[RawString(value=node["regex"]["pattern"])],
-                keywords=[]
+                keywords=[],
             )
-        
+
         value = node.get("value", "null")
         if value in ("undefined", "null"):
             return Constant(value=None)
 
         if isinstance(value, re.Pattern):
-
             return RawString(value=value.pattern)
         return Constant(value=value)
 
@@ -279,6 +276,7 @@ class ASTConverter:
 
         if callee["type"] == "MemberExpression":
             if callee["property"]["name"] == "concat":
+
                 def concat(argNum):
                     argNum -= 1
                     if argNum == 0:
@@ -293,16 +291,16 @@ class ASTConverter:
                         op=Add(),
                         right=args[argNum],
                     )
+
                 return concat(len(args))
-            
-            if callee["property"]["name"]  == "push":
+
+            if callee["property"]["name"] == "push":
                 if len(args) <= 1:
-                    return Call(func=Attribute(
-                        value=self.visit(callee['object']), attr='append'), args=args)
+                    return Call(func=Attribute(value=self.visit(callee["object"]), attr="append"), args=args)
                 else:
-                    return Call(func=Attribute(
-                        value=self.visit(callee['object']), attr='extend'), args=[List(elts=args)])
-                    
+                    return Call(
+                        func=Attribute(value=self.visit(callee["object"]), attr="extend"), args=[List(elts=args)]
+                    )
 
         func = self.visit(callee)
 
@@ -661,14 +659,9 @@ class ASTConverter:
         return JoinedStr(values=joined_str)
 
     def visit_NewExpression(self, node: dict):
-        if node['callee']['name'] == 'RegExp':
-            
+        if node["callee"]["name"] == "RegExp":
             regexp_value = self.visit(node["arguments"][0])
             if node["arguments"][0]["type"] == "Literal":
-                regexp_value = RawString(value=node["arguments"][0]['value'])
-            
-            return Call(func=Attribute(
-                value=Name(id="re"), attr="compile"),
-                args=[regexp_value],
-                keywords=[]
-            )
+                regexp_value = RawString(value=node["arguments"][0]["value"])
+
+            return Call(func=Attribute(value=Name(id="re"), attr="compile"), args=[regexp_value], keywords=[])

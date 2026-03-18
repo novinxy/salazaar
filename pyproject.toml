@@ -30,6 +30,7 @@ Homepage = 'https://github.com/novinxy/salazaar'
 Source = 'https://github.com/novinxy/salazaar'
 
 [tool.ruff]
+target-version = "py314"
 line-length = 120
 
 [tool.lint.ruff]
@@ -37,9 +38,12 @@ preview = true
 selected-extended = [
     "ARG",
     "B",
+    "E",
+    "F",
     "I",
     "N",
-    "PERF"
+    "PERF",
+    "SIM"
 ]
 
 [tool.hatch.version]
