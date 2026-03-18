@@ -301,6 +301,8 @@ class ASTConverter:
                     return Call(
                         func=Attribute(value=self.visit(callee["object"]), attr="extend"), args=[List(elts=args)]
                     )
+            if callee["property"]["name"] == "exec":
+                return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
 
         func = self.visit(callee)
 

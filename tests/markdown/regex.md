@@ -33,8 +33,20 @@ regexpValue = 'ab+c'
 regexp = re.compile(regexpValue)
 ```
 
+## Test case: exec to search
+JavaScript:
+```js
+const r = /\d+/;
+const m = r.exec("abc123");
+```
+
+Python:
+```py
+r = re.compile(r'\d+')
+m = r.search('abc123')
+```
+
 Add following tests:
-- initialize as class
 - call find
 - call match
 - call findall
