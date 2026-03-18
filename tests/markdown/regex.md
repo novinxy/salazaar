@@ -46,6 +46,19 @@ r = re.compile(r'\d+')
 m = r.search('abc123')
 ```
 
+## Test case: regex test operation
+JavaScript:
+```js
+const r = /\d+/;
+const m = r.test("abc123");
+```
+
+Python:
+```py
+r = re.compile(r'\d+')
+m = r.search('abc123') is not None
+```
+
 Add following tests:
 - call find
 - call match
