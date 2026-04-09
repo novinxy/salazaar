@@ -670,3 +670,6 @@ class ASTConverter:
                 regexp_value = RawString(value=node["arguments"][0]["value"])
 
             return Call(func=Attribute(value=Name(id="re"), attr="compile"), args=[regexp_value], keywords=[])
+
+
+# visit_SequenceExpression'
