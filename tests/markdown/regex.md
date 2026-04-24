@@ -56,7 +56,7 @@ const m = r.test("abc123");
 Python:
 ```py
 r = re.compile(r'\d+')
-m = r.search('abc123') is not None
+m = bool(r.search('abc123'))
 ```
 
 
@@ -73,7 +73,6 @@ Python:
 ```py
 regexp = re.compile(r'\d+')
 text = 'test1test2'
-
 array = regexp.finditer(text)
 ```
 
@@ -90,12 +89,16 @@ Python:
 ```py
 regexp = re.compile(r'\d+')
 text = 'test1test2'
-
 array = regexp.findall(text)
 ```
 
-Add following tests:
-- define capture groups
-- define named capture groups
-- mix of regex, \d + [] + groups
-- look behind and ahead
+## Test case: regex class with named capture group
+JavaScript:
+```js
+const regex = new RegExp("(?<num>\\d+)");
+```
+
+Python:
+```py
+regex = re.compile(r'(?P<num>\d+)')
+```

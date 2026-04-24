@@ -305,7 +305,16 @@ class ASTConverter:
                 return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
 
             if callee["property"]["name"] == "test":
-                return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
+                return Call(
+                    func=Name(id="bool"),
+                    args=[Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)],
+                )
+
+            if callee["property"]["name"] == "matchAll":
+                return Call(func=Attribute(value=args[0], attr="finditer"), args=[self.visit(callee["object"])])
+
+            if callee["property"]["name"] == "match":
+                return Call(func=Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
 
         func = self.visit(callee)
 
@@ -667,7 +676,7 @@ class ASTConverter:
         if node["callee"]["name"] == "RegExp":
             regexp_value = self.visit(node["arguments"][0])
             if node["arguments"][0]["type"] == "Literal":
-                regexp_value = RawString(value=node["arguments"][0]["value"])
+                regexp_value = RawString(value=node["arguments"][0]["value"].replace("?<", "?P<"))
 
             return Call(func=Attribute(value=Name(id="re"), attr="compile"), args=[regexp_value], keywords=[])
 
