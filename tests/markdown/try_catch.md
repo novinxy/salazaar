@@ -64,7 +64,7 @@ try {
 Python
 ```py
 try:
-    JSON.parse('invalid')
+    json.loads('invalid')
 except Exception as e:
     if isinstance(e, SyntaxError):
         console.log('Syntax error!')

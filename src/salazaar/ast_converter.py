@@ -316,7 +316,7 @@ class ASTConverter:
             if callee["property"]["name"] == "match":
                 return Call(func=Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
 
-            if callee["object"]["name"] == "JSON":
+            if callee["object"].get("name") == "JSON":
                 if callee["property"]["name"] == "parse":
                     return Call(func=Attribute(value=Name("json"), attr="loads"), args=args)
 
