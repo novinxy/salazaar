@@ -172,6 +172,19 @@ y = 30
 z = 40
 ```
 
+## Test case: multiple assigments split with comma - sequenceExpression
+JavaScript:
+```js
+x = 20, y = 30, z = 40;
+```
+
+Python:
+```py
+x = 20
+y = 30
+z = 40
+```
+
 ## Test case: multiple declarations with assignment
 JavaScript:
 ```js

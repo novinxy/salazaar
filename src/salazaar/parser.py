@@ -7,7 +7,7 @@ if sys.version_info < (3, 14):
 else:
     from _ast_unparse import Unparser
 
-from salazaar.ext_types import RawString, Comment
+from salazaar.ext_types import Empty, RawString, Comment
 
 
 class Parser(Unparser):
@@ -17,6 +17,9 @@ class Parser(Unparser):
     def visit_Comment(self, comment: Comment):
         self.maybe_newline()
         self.write(f"# {comment.value.strip()}")
+
+    def visit_Empty(self, _: Empty):
+        pass
 
     def unparse(self, node: ast.AST):
         return self.visit(ast.fix_missing_locations(node))

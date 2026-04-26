@@ -68,7 +68,7 @@ from ast import (
     match_case,
 )
 
-from salazaar.ext_types import RawString, Comment
+from salazaar.ext_types import Empty, RawString, Comment
 
 # pylint: disable=invalid-name
 
@@ -141,7 +141,7 @@ class ASTConverter:
             return visitor(node)
 
     def visit_EmptyStatement(self, _: dict):
-        return None
+        return Empty()
 
     def visit_Program(self, node: dict) -> Module:
         nodes = [self.visit(n) for n in node["body"]]
@@ -705,5 +705,5 @@ class ASTConverter:
 
         return Call(func=self.visit(node["callee"]), args=[self.visit(arg) for arg in node["arguments"]], keywords=[])
 
-
-# visit_SequenceExpression'
+    def visit_SequenceExpression(self, node: dict):
+        return [self.visit(e) for e in node["expressions"]]
