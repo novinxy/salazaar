@@ -601,7 +601,7 @@ class ASTConverter:
 
         return Try(
             body=self.visit(node["block"]),
-            handlers=[self.visit(node["handler"])],
+            handlers=[self.visit(node.get("handler"), [])],
             finalbody=self.visit(node.get("finalizer"), []),
         )
 

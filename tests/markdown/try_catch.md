@@ -21,7 +21,28 @@ except Exception as e:
     console.log('Error:', e)
 ```
 
----
+## Test case: Basic try-finally
+
+JavaScript:
+```js
+try {
+    let x = 1 / 0;
+    console.log("Hello world");
+} finally {
+    console.log('suppress');
+}
+```
+
+Python
+```py
+try:
+    x = 1 / 0
+    console.log('Hello world')
+finally:
+    console.log('suppress')
+```
+
+
 
 ## Test case: try-catch-finally
 
