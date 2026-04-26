@@ -453,6 +453,8 @@ class ASTConverter:
 
         if "init" in node:
             init = self.visit(node.get("init"))
+            if not isinstance(init, list):
+                init = [init]
         if "test" in node:
             test = self.visit(node.get("test"))
         if "update" in node:
