@@ -464,6 +464,8 @@ class ASTConverter:
             update = Expr(value=update)
 
         body = self.visit(node["body"])
+        if not isinstance(body, list):
+            body = [body]
         body.append(update)
 
         return [
