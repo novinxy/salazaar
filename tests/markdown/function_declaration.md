@@ -69,3 +69,35 @@ Python:
 def Test(arg1, arg2, arg3):
     tmp = 10
 ```
+
+
+
+## Test case: function with default value
+JavaScript:
+```js
+function Test(arg1, arg2 = 10) {
+    var tmp = 10;
+}
+```
+
+Python:
+```py
+def Test(arg1, arg2=10):
+    tmp = 10
+```
+
+## Test case: function with multiple default values
+JavaScript:
+```js
+function Test(arg1, arg2 = 10, arg3 = "Hello", arg4=[], arg5=Object()) {
+    var tmp = 10;
+}
+```
+
+Python:
+```py
+def Test(arg1, arg2=10, arg3='Hello', arg4=[], arg5=Object()):
+    tmp = 10
+```
+
+

@@ -1,5 +1,5 @@
-from typing import Any
 import re
+from typing import Any
 
 import itertools
 from ast import (
@@ -361,14 +361,26 @@ class ASTConverter:
         name = node["id"]["name"]
         body = self.visit(node["body"])
 
-        args = [arg(arg=p["name"]) for p in node["params"]]
+        args, defaults = self.parse_function_params(node["params"])
 
         return FunctionDef(
             name=name,
-            args=arguments(posonlyargs=[], args=args, kwonlyargs=[], kw_defaults=[], defaults=[]),
+            args=arguments(posonlyargs=[], args=args, kwonlyargs=[], kw_defaults=[], defaults=defaults),
             body=body,
             decorator_list=[],
         )
+
+    def parse_function_params(self, params: list[dict]) -> tuple[list[arg], list[Any]]:
+        args = []
+        defaults = []
+        for p in params:
+            if p["type"] == "AssignmentPattern":
+                args.append(arg(arg=p["left"]["name"]))
+                defaults.append(self.visit(p["right"]))
+            else:
+                args.append(arg(arg=p["name"]))
+
+        return args, defaults
 
     def visit_BlockStatement(self, node: dict):
         body_statements = node["body"]
@@ -519,11 +531,13 @@ class ASTConverter:
             if node.get("id"):
                 func_name = node["id"]["name"]
 
+            args, defaults = self.parse_function_params(node["params"])
+
             # TODO novinxy: instead of of append add some simple abstraction
             self.injected_blocks.append(
                 FunctionDef(
                     name=func_name,
-                    args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+                    args=arguments(args=args, defaults=defaults),
                     body=self.visit(node_body),
                 )
             )
@@ -544,10 +558,12 @@ class ASTConverter:
         body = node["body"]
 
         if body["type"] == "BlockStatement" and len(body["body"]) != 1:
+            args, defaults = self.parse_function_params(node["params"])
+
             self.injected_blocks.append(
                 FunctionDef(
                     name="local_anonymous_func",
-                    args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+                    args=arguments(args=args, defaults=defaults),
                     body=self.visit(body),
                 )
             )
@@ -641,7 +657,7 @@ class ASTConverter:
     def visit_MethodDefinition(self, node: dict):
         body = self.visit(node["value"]["body"])
 
-        params = [self.visit(a) for a in node["value"]["params"]]
+        params, defaults = self.parse_function_params(node["value"]["params"])
         decorators = [Name(id="staticmethod")]
 
         if not node["static"]:
@@ -654,7 +670,7 @@ class ASTConverter:
 
         return FunctionDef(
             name=func_name,
-            args=arguments(args=params),
+            args=arguments(args=params, defaults=defaults),
             body=body,
             decorator_list=decorators,
         )
