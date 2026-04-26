@@ -687,5 +687,7 @@ class ASTConverter:
 
             return Call(func=Attribute(value=Name(id="re"), attr="compile"), args=[regexp_value], keywords=[])
 
+        return Call(func=self.visit(node["callee"]), args=[self.visit(arg) for arg in node["arguments"]], keywords=[])
+
 
 # visit_SequenceExpression'
