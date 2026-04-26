@@ -58,6 +58,59 @@ while index >= 0:
     index -= 1
 ```
 
+## Test case: for loop empty init
+JavaScript:
+```js
+for (; !files.atEnd(); files.moveNext()) {
+    var fileName = files.Name();
+}
+```
+
+Python:
+```py
+while not files.atEnd():
+    fileName = files.Name()
+    files.moveNext()
+```
+
+## Test case: for loop empty condition
+JavaScript:
+```js
+for (let value = 1;; files.moveNext()) {
+    if (files.atEnd()) {
+        break;
+    }
+    var fileName = files.Name();
+}
+```
+
+Python:
+```py
+value = 1
+while True:
+    if files.atEnd():
+        break
+    fileName = files.Name()
+    files.moveNext()
+```
+
+## Test case: for loop empty afterthough
+JavaScript:
+```js
+for (let value = 1;!files.atEnd();) {
+    var fileName = files.Name();
+    files.moveNext()
+}
+```
+
+Python:
+```py
+value = 1
+while not files.atEnd():
+    fileName = files.Name()
+    files.moveNext()
+```
+
 ## Test case: for of loop with continue statement
 JavaScript:
 ```js

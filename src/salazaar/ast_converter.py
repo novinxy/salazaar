@@ -447,15 +447,25 @@ class ASTConverter:
         )
 
     def visit_ForStatement(self, node: dict):
-        init = self.visit(node["init"])
-        test = self.visit(node["test"])
-        update = self.visit(node["update"])
+        init = [Empty()]
+        test = Constant(value=True)
+        update = Empty()
+
+        if "init" in node:
+            init = self.visit(node.get("init"))
+        if "test" in node:
+            test = self.visit(node.get("test"))
+        if "update" in node:
+            update = self.visit(node.get("update"))
+
+        if isinstance(update, expr):
+            update = Expr(value=update)
 
         body = self.visit(node["body"])
         body.append(update)
 
         return [
-            init[0],
+            *init,
             While(
                 test=test,
                 body=body,
