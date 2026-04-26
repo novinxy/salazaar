@@ -18,6 +18,26 @@ class Rectangle:
         self.width = width
 ```
 
+## Test case: Class declaration with default arguments
+JavaScript:
+```js
+class Rectangle {
+  constructor(height, width = 0) {
+    this.height = height;
+    this.width = width;
+  }
+}
+```
+
+Python:
+```py
+class Rectangle:
+
+    def __init__(self, height, width=0):
+        self.height = height
+        self.width = width
+```
+
 ## Test case: Class declaration with inheritance
 JavaScript:
 ```js
