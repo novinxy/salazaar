@@ -74,3 +74,29 @@ Python:
 ```py
 newCollection = collection + secondCollection + thirdCollection + col
 ```
+
+
+## Test case: sort function
+JavaScript:
+```js
+collection.sort()
+```
+
+Python:
+```py
+collection.sort()
+```
+
+
+## Test case: sort function with function
+JavaScript:
+```js
+collection.sort(function compare(a,b) {
+    return a.value > b.value
+})
+```
+
+Python:
+```py
+collection.sort(key=lambda a: a.value)
+```
