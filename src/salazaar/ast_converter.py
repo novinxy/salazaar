@@ -240,11 +240,14 @@ class ASTConverter:
         return Constant(value=value)
 
     def visit_Identifier(self, node: dict) -> expr:
-        value = node["name"]
-        if value in ("undefined", "null"):
+        name = node["name"]
+        if name in ("undefined", "null"):
             return Constant(value=None)
 
-        return Name(id=value)
+        if name == "Boolean":
+            return Name(id="bool")
+
+        return Name(id=name)
 
     def visit_ExpressionStatement(self, node: dict):
         if node["expression"]["type"] in ("CallExpression", "MemberExpression"):
