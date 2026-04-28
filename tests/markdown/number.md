@@ -6,9 +6,16 @@ var text = Number(rawValue)
 
 Python:
 ```py
-value =  None
-try:
-    value = float(rawValue)
-except ValueError:
-    pass
+text = float(rawValue)
+```
+
+## Test case: new Number class conversion with number
+JavaScript:
+```js
+var text = new Number()
+```
+
+Python:
+```py
+text = float()
 ```

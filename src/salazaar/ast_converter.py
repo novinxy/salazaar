@@ -247,6 +247,9 @@ class ASTConverter:
         if name == "Boolean":
             return Name(id="bool")
 
+        if name == "Number":
+            return Name(id="float")
+
         return Name(id=name)
 
     def visit_ExpressionStatement(self, node: dict):
