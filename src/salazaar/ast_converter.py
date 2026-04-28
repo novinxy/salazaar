@@ -244,11 +244,14 @@ class ASTConverter:
         if name in ("undefined", "null"):
             return Constant(value=None)
 
-        if name == "Boolean":
-            return Name(id="bool")
+        mapping = {
+            "Boolean": "bool",
+            "Number": "float",
+            "String": "str",
+        }
 
-        if name == "Number":
-            return Name(id="float")
+        if name in mapping.keys():
+            return Name(id=mapping[name])
 
         return Name(id=name)
 
