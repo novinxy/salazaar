@@ -113,6 +113,7 @@ operators: dict[str, Any] = {
 class ASTConverter:
     def __init__(self):
         self.injected_blocks = []
+        self.imports = set()
 
     def visit(self, node: dict | None, default=None) -> Any:
         if node is None:
@@ -161,6 +162,7 @@ class ASTConverter:
 
             body += n
 
+        body = [Import(names=[alias(i)]) for i in self.imports] + body
         return Module(body=body, type_ignores=[])
 
     def visit_UpdateExpression(self, node: dict):
@@ -221,6 +223,8 @@ class ASTConverter:
 
     def visit_Literal(self, node: dict) -> Constant | RawString:
         if "regex" in node:
+            self.imports.add("re")
+
             return Call(
                 func=Attribute(value=Name(id="re"), attr="compile"),
                 args=[RawString(value=node["regex"]["pattern"])],
@@ -302,18 +306,22 @@ class ASTConverter:
                         func=Attribute(value=self.visit(callee["object"]), attr="extend"), args=[List(elts=args)]
                     )
             if callee["property"]["name"] == "exec":
+                self.imports.add("re")
                 return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
 
             if callee["property"]["name"] == "test":
+                self.imports.add("re")
                 return Call(
                     func=Name(id="bool"),
                     args=[Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)],
                 )
 
             if callee["property"]["name"] == "matchAll":
+                self.imports.add("re")
                 return Call(func=Attribute(value=args[0], attr="finditer"), args=[self.visit(callee["object"])])
 
             if callee["property"]["name"] == "match":
+                self.imports.add("re")
                 return Call(func=Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
 
             if callee["object"].get("name") == "JSON":
@@ -711,6 +719,8 @@ class ASTConverter:
 
     def visit_NewExpression(self, node: dict):
         if node["callee"]["name"] == "RegExp":
+            self.imports.add("re")
+
             regexp_value = self.visit(node["arguments"][0])
             if node["arguments"][0]["type"] == "Literal":
                 regexp_value = RawString(value=node["arguments"][0]["value"].replace("?<", "?P<"))

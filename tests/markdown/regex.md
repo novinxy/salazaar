@@ -6,6 +6,7 @@ const regex = /ab+c/;
 
 Python:
 ```py
+import re
 regex = re.compile(r'ab+c')
 ```
 
@@ -17,6 +18,7 @@ const regex =  new RegExp("ab+c");
 
 Python:
 ```py
+import re
 regex = re.compile(r'ab+c')
 ```
 
@@ -29,6 +31,7 @@ const regexp =  new RegExp(regexpValue);
 
 Python:
 ```py
+import re
 regexpValue = 'ab+c'
 regexp = re.compile(regexpValue)
 ```
@@ -42,6 +45,7 @@ const m = r.exec("abc123");
 
 Python:
 ```py
+import re
 r = re.compile(r'\d+')
 m = r.search('abc123')
 ```
@@ -55,6 +59,7 @@ const m = r.test("abc123");
 
 Python:
 ```py
+import re
 r = re.compile(r'\d+')
 m = bool(r.search('abc123'))
 ```
@@ -71,6 +76,7 @@ const array = text.matchAll(regexp);
 
 Python:
 ```py
+import re
 regexp = re.compile(r'\d+')
 text = 'test1test2'
 array = regexp.finditer(text)
@@ -87,6 +93,7 @@ const array = text.match(regexp);
 
 Python:
 ```py
+import re
 regexp = re.compile(r'\d+')
 text = 'test1test2'
 array = regexp.findall(text)
@@ -100,5 +107,6 @@ const regex = new RegExp("(?<num>\\d+)");
 
 Python:
 ```py
+import re
 regex = re.compile(r'(?P<num>\d+)')
 ```
