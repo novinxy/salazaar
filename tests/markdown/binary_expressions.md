@@ -277,3 +277,15 @@ Python:
 ```py
 isinstance(obj, CustomObject)
 ```
+
+## Test case: binary plus operator
+
+JavaScript:
+```js
+console.log(+value)
+```
+
+Python:
+```py
+console.log(+value)
+```

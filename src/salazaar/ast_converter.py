@@ -3,6 +3,7 @@ from typing import Any
 
 import itertools
 from ast import (
+    UAdd,
     operator,
     ClassDef,
     FormattedValue,
@@ -497,7 +498,7 @@ class ASTConverter:
         ]
 
     def visit_UnaryExpression(self, node: dict):
-        op = {"-": USub(), "~": Invert(), "!": Not()}[node["operator"]]
+        op = {"-": USub(), "~": Invert(), "!": Not(), "+": UAdd()}[node["operator"]]
 
         return UnaryOp(op=op, operand=self.visit(node["argument"]))
 
