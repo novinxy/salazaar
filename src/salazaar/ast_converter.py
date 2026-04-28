@@ -326,9 +326,11 @@ class ASTConverter:
 
             if callee["object"].get("name") == "JSON":
                 if callee["property"]["name"] == "parse":
+                    self.imports.add("json")
                     return Call(func=Attribute(value=Name("json"), attr="loads"), args=args)
 
                 if callee["property"]["name"] == "stringify":
+                    self.imports.add("json")
                     return Call(func=Attribute(value=Name("json"), attr="dumps"), args=args)
 
         func = self.visit(callee)

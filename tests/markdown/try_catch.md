@@ -84,6 +84,7 @@ try {
 
 Python
 ```py
+import json
 try:
     json.loads('invalid')
 except Exception as e:
