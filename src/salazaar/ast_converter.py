@@ -38,6 +38,8 @@ from ast import (
     Import,
     ImportFrom,
     Invert,
+    Is,
+    IsNot,
     LShift,
     Lambda,
     List,
@@ -72,6 +74,10 @@ from ast import (
 from salazaar.ext_types import Empty, RawString, Comment
 
 # pylint: disable=invalid-name
+
+
+def is_typeof(node: dict):
+    return node["type"] == "UnaryExpression" and node["operator"] == "typeof"
 
 
 operators: dict[str, Any] = {
@@ -257,16 +263,60 @@ class ASTConverter:
         return Name(id=name)
 
     def visit_ExpressionStatement(self, node: dict):
-        if node["expression"]["type"] in ("CallExpression", "MemberExpression"):
+        if node["expression"]["type"] in ("CallExpression", "MemberExpression", "BinaryExpression"):
             # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
 
             return Expr(self.visit(node["expression"]))
         return self.visit(node["expression"])
 
+    def visit_compare_typeof(self, node: dict):
+        op = operators.get(node["operator"], None)
+
+        # Both sides are typeof → type(a) == type(b)
+        if is_typeof(node["left"]) and is_typeof(node["right"]):
+            left_arg = self.visit(node["left"]["argument"])
+            right_arg = self.visit(node["right"]["argument"])
+
+            return Compare(
+                left=Call(func=Name(id="type"), args=[left_arg], keywords=[]),
+                ops=[op],
+                comparators=[Call(func=Name(id="type"), args=[right_arg], keywords=[])],
+            )
+
+        type_map = {
+            "string": Name(id="str"),
+            "number": Tuple(elts=[Name(id="int"), Name(id="float")]),
+            "boolean": Name(id="bool"),
+            "object": Name(id="object"),
+        }
+
+        if is_typeof(node["left"]):
+            argument = self.visit(node["left"]["argument"])
+            type_str = node["right"]["value"]
+        else:
+            argument = self.visit(node["right"]["argument"])
+            type_str = node["left"]["value"]
+
+        if type_str == "undefined":
+            op = Is() if isinstance(op, Eq) else IsNot()
+            return Compare(left=argument, ops=[op], comparators=[Constant(value=None)])
+
+        python_type = type_map.get(type_str, Name(id="object"))
+        isinstance_call = Call(func=Name(id="isinstance"), args=[argument, python_type], keywords=[])
+
+        if not isinstance(op, Eq):
+            return UnaryOp(op=Not(), operand=isinstance_call)
+
+        return isinstance_call
+
     def visit_BinaryExpression(self, node: dict):
         operator_ = node["operator"]
+
         left = self.visit(node["left"])
         right = self.visit(node["right"])
+
+        if is_typeof(node["left"]) or is_typeof(node["right"]):
+            return self.visit_compare_typeof(node)
 
         match operators.get(operator_, operator_):
             case cmpop():
@@ -498,9 +548,13 @@ class ASTConverter:
         ]
 
     def visit_UnaryExpression(self, node: dict):
-        op = {"-": USub(), "~": Invert(), "!": Not(), "+": UAdd()}[node["operator"]]
+        op = {"-": USub(), "~": Invert(), "!": Not(), "+": UAdd()}.get(node["operator"])
 
-        return UnaryOp(op=op, operand=self.visit(node["argument"]))
+        if op is not None:
+            return UnaryOp(op=op, operand=self.visit(node["argument"]))
+
+        if node["operator"]:
+            return Call(func=Name(id="type"), args=[self.visit(node["argument"])])
 
     def visit_ArrayExpression(self, node: dict):
         elements = [self.visit(e) for e in node["elements"]]
