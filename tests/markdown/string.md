@@ -75,6 +75,17 @@ Python:
 var1 = value.split(',')
 ```
 
+## Test case: split separator + max
+JavaScript:
+```js
+var1 = value.split(',', 2);
+```
+
+Python:
+```py
+var1 = value.split(',', 2)
+```
+
 ## Test case: replace 
 JavaScript:
 ```js
