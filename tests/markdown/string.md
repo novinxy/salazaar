@@ -83,7 +83,7 @@ var1 = value.split(',', 2);
 
 Python:
 ```py
-var1 = value.split(',', 2)
+var1 = value.split(',')[:2]
 ```
 
 ## Test case: replace 
