@@ -428,6 +428,12 @@ class ASTConverter:
                     slice=Slice(lower=args[0], upper=args[1]),
                 )
 
+            if callee["property"]["name"] == "toLowerCase":
+                return Call(func=Attribute(value=self.visit(callee["object"]), attr="lower"), args=[])
+
+            if callee["property"]["name"] == "toUpperCase":
+                return Call(func=Attribute(value=self.visit(callee["object"]), attr="upper"), args=[])
+
         func = self.visit(callee)
 
         return Call(func=func, args=args, keywords=[])
