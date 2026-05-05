@@ -535,9 +535,13 @@ class ASTConverter:
         if not isinstance(orelse, list):
             orelse = [orelse]
 
+        body = self.visit(node["consequent"])
+        if not isinstance(body, list):
+            body = [body]
+
         return If(
             test=self.visit(node["test"]),
-            body=self.visit(node["consequent"]),
+            body=body,
             orelse=orelse,
         )
 
@@ -715,7 +719,13 @@ class ASTConverter:
             pattern = self.visit(case_.get("test"), Name(id="_"))
 
             all_consequent = itertools.chain.from_iterable(c["consequent"] for c in node["cases"][idx::])
-            all_cases = [self.visit(stmt) for stmt in all_consequent]
+            all_cases = []
+            for stmt in all_consequent:
+                result = self.visit(stmt)
+                if isinstance(result, list):
+                    all_cases.extend(result)
+                else:
+                    all_cases.append(result)
 
             body = list(itertools.takewhile(lambda c: not isinstance(c, Break), all_cases))
 
