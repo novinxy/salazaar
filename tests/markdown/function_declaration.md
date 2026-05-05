@@ -18,6 +18,9 @@ JavaScript:
 function Test() {
     var tmp = 10;
     tmp += 1
+    if (test.name.value)
+        log()
+    log(4)
 }
 ```
 
@@ -26,6 +29,9 @@ Python:
 def Test():
     tmp = 10
     tmp += 1
+    if test.name.value:
+        log()
+    log(4)
 ```
 
 ## Test case: simple function with return
@@ -101,3 +107,23 @@ def Test(arg1, arg2=10, arg3='Hello', arg4=[], arg5=Object()):
 ```
 
 
+### Test case: multiple functions
+JavaScript:
+```js
+function Test1() {
+    var tmp = 10;
+}
+
+function Test2() {
+    var tmp = 10;
+}
+```
+
+Python:
+```py
+def Test1():
+    tmp = 10
+
+def Test2():
+    tmp = 10
+```
