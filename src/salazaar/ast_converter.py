@@ -69,6 +69,7 @@ from ast import (
     cmpop,
     expr,
     match_case,
+    Slice,
 )
 
 from salazaar.ext_types import Empty, RawString, Comment
@@ -392,6 +393,17 @@ class ASTConverter:
                 if callee["property"]["name"] == "stringify":
                     self.imports.add("json")
                     return Call(func=Attribute(value=Name("json"), attr="dumps"), args=args)
+
+            if callee["property"]["name"] == "trim":
+                return Call(func=Attribute(value=self.visit(callee["object"]), attr="strip"), args=args)
+
+            if callee["property"]["name"] == "split":
+                if len(args) == 2:
+                    return Subscript(
+                        value=Call(func=Attribute(value=self.visit(callee["object"]), attr="split"), args=[args[0]]),
+                        slice=Slice(upper=args[1]),
+                    )
+                return Call(func=Attribute(value=self.visit(callee["object"]), attr="split"), args=args)
 
         func = self.visit(callee)
 
