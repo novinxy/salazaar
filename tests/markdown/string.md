@@ -100,19 +100,17 @@ var1 = value.replace('a', 'b')
 ## Test case: substr 
 JavaScript:
 ```js
-// start, lenth
 var1 = value.substr(1, 3);
 ```
 
 Python:
 ```py
-var1 = value[1:4]
+var1 = value[1:1 + 3]
 ```
 
 ## Test case: substr 2
 JavaScript:
 ```js
-// start, lenth
 var1 = value.substr(3);
 ```
 

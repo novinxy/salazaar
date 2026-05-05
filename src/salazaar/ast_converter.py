@@ -404,6 +404,17 @@ class ASTConverter:
                         slice=Slice(upper=args[1]),
                     )
                 return Call(func=Attribute(value=self.visit(callee["object"]), attr="split"), args=args)
+            if callee["property"]["name"] == "substr":
+                if len(args) == 1:
+                    return Subscript(
+                        value=self.visit(callee["object"]),
+                        slice=Slice(lower=args[0]),
+                    )
+
+                return Subscript(
+                    value=self.visit(callee["object"]),
+                    slice=Slice(lower=args[0], upper=BinOp(left=args[0], op=Add(), right=args[1])),
+                )
 
         func = self.visit(callee)
 
