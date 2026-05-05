@@ -122,7 +122,6 @@ var1 = value[3:]
 ## Test case: substring
 JavaScript:
 ```js
-// start, end
 var1 = value.substring(1, 3);
 ```
 
@@ -134,7 +133,6 @@ var1 = value[1:3]
 ## Test case: substring 2
 JavaScript:
 ```js
-// start, lenth
 var1 = value.substring(3);
 ```
 
