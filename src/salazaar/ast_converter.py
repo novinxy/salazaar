@@ -622,9 +622,13 @@ class ASTConverter:
         return Attribute(value=value, attr=node["property"]["name"])
 
     def visit_ForOfStatement(self, node: dict):
+        target = self.visit(node["left"])
+        if node["left"]["type"] == "VariableDeclaration":
+            target = Name(id=node["left"]["declarations"][0]["id"]["name"])
+
         return For(
             iter=self.visit(node["right"]),
-            target=Name(id=node["left"]["declarations"][0]["id"]["name"]),
+            target=target,
             body=self.visit(node["body"]),
             orelse=[],
         )

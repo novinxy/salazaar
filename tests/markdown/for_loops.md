@@ -4,17 +4,7 @@ JavaScript:
 for (const i in collection) {
     var tmp = collection[i];
 }
-```
 
-Python:
-```py
-for i in range(len(collection)):
-    tmp = collection[i]
-```
-
-## Test case: for in forgot const
-JavaScript:
-```js
 for (i in collection) {
     var tmp = collection[i];
 }
@@ -22,6 +12,8 @@ for (i in collection) {
 
 Python:
 ```py
+for i in range(len(collection)):
+    tmp = collection[i]
 for i in range(len(collection)):
     tmp = collection[i]
 ```
@@ -32,10 +24,16 @@ JavaScript:
 for (const elem of collection) {
     var tmp = elem;
 }
+
+for (elem of collection) {
+    var tmp = elem;
+}
 ```
 
 Python:
 ```py
+for elem in collection:
+    tmp = elem
 for elem in collection:
     tmp = elem
 ```
@@ -46,10 +44,18 @@ JavaScript:
 for (let index = 0; index < array.length; index++) {
     const element = array[index];
 }
+
+for (index = 0; index < array.length; index++) {
+    const element = array[index];
+}
 ```
 
 Python:
 ```py
+index = 0
+while index < len(array):
+    element = array[index]
+    index += 1
 index = 0
 while index < len(array):
     element = array[index]
