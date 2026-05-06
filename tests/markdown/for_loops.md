@@ -12,6 +12,20 @@ for i in range(len(collection)):
     tmp = collection[i]
 ```
 
+## Test case: for in forgot const
+JavaScript:
+```js
+for (i in collection) {
+    var tmp = collection[i];
+}
+```
+
+Python:
+```py
+for i in range(len(collection)):
+    tmp = collection[i]
+```
+
 ## Test case: for of
 JavaScript:
 ```js

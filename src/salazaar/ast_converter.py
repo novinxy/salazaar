@@ -554,9 +554,13 @@ class ASTConverter:
 
         body = self.visit(node["body"])
 
+        target = self.visit(node["left"])
+        if node["left"]["type"] == "VariableDeclaration":
+            target = Name(id=node["left"]["declarations"][0]["id"]["name"])
+
         return For(
             iter=iter_elem,
-            target=Name(id=node["left"]["declarations"][0]["id"]["name"]),
+            target=target,
             body=body,
             orelse=[],
         )
