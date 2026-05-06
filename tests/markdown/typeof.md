@@ -10,12 +10,40 @@ Python
 result = type(value)
 ```
 
+## Test case: typeof with parenthese assign to variable
+
+JavaScript:
+```js
+let result = typeof(value)
+```
+
+Python
+```py
+result = type(value)
+```
+
 ## Test case: typeof String
 
 JavaScript:
 ```js
 let result = typeof value
 typeof value == "string"
+typeof value != "string"
+```
+
+Python
+```py
+result = type(value)
+isinstance(value, str)
+not isinstance(value, str)
+```
+
+## Test case: typeof with prenthese String
+
+JavaScript:
+```js
+let result = typeof(value)
+typeof(value) == "string"
 typeof value != "string"
 ```
 
@@ -83,6 +111,22 @@ Python
 isinstance(value, object)
 not isinstance(value, object)
 ```
+
+## Test case: typeof object with paranthese
+
+JavaScript:
+```js
+typeof(value) == "object"
+typeof(value) != "object"
+```
+
+Python
+```py
+isinstance(value, object)
+not isinstance(value, object)
+```
+
+
 ## Test case: typeof on both sides
 
 JavaScript:
@@ -95,4 +139,16 @@ Python
 ```py
 type(value) == type(value1)
 type(value) != type(value2)
+```
+
+## Test case: typeof with string concat
+
+JavaScript:
+```js
+var tmp = "value is type: " + typeof(value) + " end"
+```
+
+Python
+```py
+tmp = 'value is type: ' + type(value) + ' end'
 ```

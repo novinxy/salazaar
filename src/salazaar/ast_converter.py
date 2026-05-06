@@ -316,7 +316,7 @@ class ASTConverter:
         left = self.visit(node["left"])
         right = self.visit(node["right"])
 
-        if is_typeof(node["left"]) or is_typeof(node["right"]):
+        if is_typeof(node["left"]) or is_typeof(node["right"]) and operator_ in ("==", "!=", "===", "!=="):
             return self.visit_compare_typeof(node)
 
         match operators.get(operator_, operator_):
