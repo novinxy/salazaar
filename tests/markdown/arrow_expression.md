@@ -25,3 +25,14 @@ def local_anonymous_func(num):
     return tmp
 squares = numbers.map(local_anonymous_func)
 ```
+
+## Test case: empty arrow function to python lambda
+JavaScript:
+```js
+const squares = numbers.map(num => {});
+```
+
+Python:
+```py
+squares = numbers.map(lambda num: ...)
+```

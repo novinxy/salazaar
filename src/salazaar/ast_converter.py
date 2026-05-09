@@ -472,6 +472,8 @@ class ASTConverter:
         body = self.visit(body)
         if body == []:
             body += [Expr(Constant(value=Ellipsis))]
+        if not isinstance(body, list):
+            body = [body]
         return body
 
     def visit_FunctionDeclaration(self, node: dict):
@@ -691,7 +693,10 @@ class ASTConverter:
 
             return Name(id=func_name)
 
-        body = self.visit(node_body["body"][0])
+        if node_body["body"] == []:
+            body = Expr(Constant(value=Ellipsis))
+        else:
+            body = self.visit(node_body["body"][0])
 
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
@@ -702,22 +707,22 @@ class ASTConverter:
         )
 
     def visit_ArrowFunctionExpression(self, node: dict):
-        body = node["body"]
+        node_body = node["body"]
 
-        if body["type"] == "BlockStatement" and len(body["body"]) != 1:
+        if node_body["type"] == "BlockStatement" and len(node_body["body"]) > 1:
             args, defaults = self.parse_function_params(node["params"])
 
             self.injected_blocks.append(
                 FunctionDef(
                     name="local_anonymous_func",
                     args=arguments(args=args, defaults=defaults),
-                    body=self.visit(body),
+                    body=self.visit(node_body),
                 )
             )
 
             return Name(id="local_anonymous_func")
 
-        body = self.visit(body)
+        body = self.visit_body(node_body)[0]
 
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
