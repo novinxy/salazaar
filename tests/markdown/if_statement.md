@@ -108,3 +108,23 @@ else:
     tmp -= 1
     console.log('hello')
 ```
+
+## Test case: empty if-elif-else
+JavaScript:
+```js
+if (true){}
+else if (false) {}
+else {
+}
+
+```
+
+Python:
+```py
+if True:
+    ...
+elif False:
+    ...
+else:
+    ...
+```

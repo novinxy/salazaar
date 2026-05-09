@@ -517,6 +517,9 @@ class ASTConverter:
 
             block += statement
 
+        if block == []:
+            block += [Expr(Constant(value=Ellipsis))]
+
         return block
 
     def visit_LogicalExpression(self, node: dict):
@@ -543,7 +546,7 @@ class ASTConverter:
         if not isinstance(orelse, list):
             orelse = [orelse]
 
-        body = self.visit(node["consequent"])
+        body = self.visit_or_ellipsis(node["consequent"])
         if not isinstance(body, list):
             body = [body]
 
