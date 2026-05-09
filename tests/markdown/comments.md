@@ -72,6 +72,11 @@ let value = "hello"
 returns "hello" */
 function hello() {
 
+    if (true) {
+        // nested comment
+        console.log("hello")
+    }
+
     // inner comment
     return "Hello"
 }
@@ -85,6 +90,9 @@ value = 'hello'
 # returns "hello"
 
 def hello():
-# inner comment
+    if True:
+        # nested comment
+        console.log('hello')
+    # inner comment
     return 'Hello'
 ```

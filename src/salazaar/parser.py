@@ -16,7 +16,7 @@ class Parser(Unparser):
 
     def visit_Comment(self, comment: Comment):
         self.maybe_newline()
-        self.write(f"# {comment.value.strip()}")
+        self.write("    " * self._indent + f"# {comment.value.strip()}")
 
     def visit_Empty(self, _: Empty):
         pass
