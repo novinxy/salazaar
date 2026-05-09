@@ -127,6 +127,45 @@ match status:
         result = False
 ```
 
+## Test case: empty default
+JavaScript:
+```js
+switch (status) {
+    case "ok":
+        result = true;
+        break;
+    default:
+}
+```
+
+Python:
+```py
+match status:
+    case 'ok':
+        result = True
+    case _:
+        pass
+```
+
+## Test case: empty switch
+JavaScript:
+```js
+switch (status) {
+    case "ok":
+        break;
+    default:
+}
+```
+
+Python:
+```py
+match status:
+    case 'ok':
+        pass
+    case _:
+        pass
+```
+
 
 ## Test case: nested switch
 

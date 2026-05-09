@@ -737,6 +737,9 @@ class ASTConverter:
 
             body = list(itertools.takewhile(lambda c: not isinstance(c, Break), all_cases))
 
+            if body == []:
+                body += [Expr(Name(id="pass"))]
+
             cases.append(match_case(pattern=pattern, body=body))
 
         return Match(subject=self.visit(node["discriminant"]), cases=cases)
