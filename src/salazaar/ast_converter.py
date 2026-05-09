@@ -468,17 +468,9 @@ class ASTConverter:
 
         return Assign(targets=targets, value=value)
 
-    def visit_or_ellipsis(self, body: list[dict]) -> list[expr]:
-        body = self.visit(body)
-        if body == []:
-            body += [Expr(Constant(value=Ellipsis))]
-        if not isinstance(body, list):
-            body = [body]
-        return body
-
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
-        body = self.visit_or_ellipsis(node["body"])
+        body = self.visit(node["body"])
 
         args, defaults = self.parse_function_params(node["params"])
 
@@ -502,23 +494,23 @@ class ASTConverter:
         return args, defaults
 
     def visit_BlockStatement(self, node: dict):
-        body_statements = node["body"]
+        body = node["body"]
+
+        if body == []:
+            return [Expr(Constant(value=Ellipsis))]
 
         block = []
 
-        for b in body_statements:
-            statement = self.visit(b)
-            if not isinstance(statement, list):
-                statement = [statement]
+        for stmt in body:
+            expression = self.visit(stmt)
+            if not isinstance(expression, list):
+                expression = [expression]
 
             if self.injected_blocks:
                 block += self.injected_blocks
                 self.injected_blocks = []
 
-            block += statement
-
-        if block == []:
-            block += [Expr(Constant(value=Ellipsis))]
+            block += expression
 
         return block
 
@@ -546,7 +538,7 @@ class ASTConverter:
         if not isinstance(orelse, list):
             orelse = [orelse]
 
-        body = self.visit_or_ellipsis(node["consequent"])
+        body = self.visit(node["consequent"])
         if not isinstance(body, list):
             body = [body]
 
@@ -563,7 +555,7 @@ class ASTConverter:
             keywords=[],
         )
 
-        body = self.visit_or_ellipsis(node["body"])
+        body = self.visit(node["body"])
 
         target = self.visit(node["left"])
         if node["left"]["type"] == "VariableDeclaration":
@@ -593,7 +585,7 @@ class ASTConverter:
         if isinstance(update, expr):
             update = Expr(value=update)
 
-        body = self.visit_or_ellipsis(node["body"])
+        body = self.visit(node["body"])
         if not isinstance(body, list):
             body = [body]
         body.append(update)
@@ -640,7 +632,7 @@ class ASTConverter:
         return For(
             iter=self.visit(node["right"]),
             target=target,
-            body=self.visit_or_ellipsis(node["body"]),
+            body=self.visit(node["body"]),
             orelse=[],
         )
 
@@ -725,7 +717,9 @@ class ASTConverter:
 
             return Name(id="local_anonymous_func")
 
-        body = self.visit_or_ellipsis(node_body)[0]
+        body = self.visit(node_body)
+        if isinstance(body, list):
+            body = body[0]
 
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
@@ -765,10 +759,10 @@ class ASTConverter:
 
         finalbody = []
         if "finalizer" in node:
-            finalbody = self.visit_or_ellipsis(node["finalizer"])
+            finalbody = self.visit(node["finalizer"])
 
         return Try(
-            body=self.visit_or_ellipsis(node["block"]),
+            body=self.visit(node["block"]),
             handlers=[self.visit(node.get("handler"), [])],
             finalbody=finalbody,
         )
@@ -780,7 +774,7 @@ class ASTConverter:
         return ExceptHandler(
             type=Name(id="Exception"),
             name=node["param"]["name"],
-            body=self.visit_or_ellipsis(node["body"]),
+            body=self.visit(node["body"]),
         )
 
     def visit_ThrowStatement(self, node: dict):
@@ -816,11 +810,16 @@ class ASTConverter:
         return ClassDef(
             name=node["id"]["name"],
             bases=bases,
-            body=self.visit_or_ellipsis(node["body"]),
+            body=self.visit(node["body"]),
         )
 
     def visit_ClassBody(self, node: dict):
-        return [self.visit(n) for n in node["body"]]
+        class_body = [self.visit(n) for n in node["body"]]
+
+        if class_body == []:
+            class_body += [Expr(Constant(value=Ellipsis))]
+
+        return class_body
 
     def visit_MethodDefinition(self, node: dict):
         body = self.visit(node["value"]["body"])
