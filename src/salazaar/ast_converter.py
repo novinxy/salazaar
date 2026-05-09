@@ -637,7 +637,7 @@ class ASTConverter:
         return For(
             iter=self.visit(node["right"]),
             target=target,
-            body=self.visit(node["body"]),
+            body=self.visit_body(node),
             orelse=[],
         )
 

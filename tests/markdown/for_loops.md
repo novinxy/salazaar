@@ -53,6 +53,19 @@ for elem in collection:
     tmp = elem
 ```
 
+## Test case: for of empty
+JavaScript:
+```js
+for (const elem of collection) {
+}
+```
+
+Python:
+```py
+for elem in collection:
+    pass
+```
+
 ## Test case: for loop ascending
 JavaScript:
 ```js
