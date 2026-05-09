@@ -366,6 +366,12 @@ class ASTConverter:
                     return Call(
                         func=Attribute(value=self.visit(callee["object"]), attr="extend"), args=[List(elts=args)]
                     )
+            if callee["property"]["name"] == "join":
+                join_char = Constant(value="")
+                if args:
+                    join_char = args[0]
+                return Call(func=Attribute(value=join_char, attr="join"), args=[self.visit(callee["object"])])
+
             if callee["property"]["name"] == "exec":
                 self.imports.add("re")
                 return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)

@@ -100,3 +100,29 @@ Python:
 ```py
 collection.sort(key=lambda a: a.value)
 ```
+
+## Test case: array join
+JavaScript:
+```js
+array.join()
+array.join("-")
+array.join(tmp)
+```
+
+Python:
+```py
+''.join(array)
+'-'.join(array)
+tmp.join(array)
+```
+
+## Test case: array pop
+JavaScript:
+```js
+let value = array.pop()
+```
+
+Python:
+```py
+value = array.pop()
+```
