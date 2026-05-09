@@ -468,17 +468,15 @@ class ASTConverter:
 
         return Assign(targets=targets, value=value)
 
-    def visit_body(self, node: dict) -> list[expr]:
-        body_statements = node["body"]
-
-        body = self.visit(body_statements)
+    def visit_body(self, body: list[dict]) -> list[expr]:
+        body = self.visit(body)
         if body == []:
-            body += [Expr(Name(id="pass"))]
+            body += [Expr(Constant(value=Ellipsis))]
         return body
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
-        body = self.visit_body(node)
+        body = self.visit_body(node["body"])
 
         args, defaults = self.parse_function_params(node["params"])
 
@@ -560,7 +558,7 @@ class ASTConverter:
             keywords=[],
         )
 
-        body = self.visit_body(node)
+        body = self.visit_body(node["body"])
 
         target = self.visit(node["left"])
         if node["left"]["type"] == "VariableDeclaration":
@@ -590,7 +588,7 @@ class ASTConverter:
         if isinstance(update, expr):
             update = Expr(value=update)
 
-        body = self.visit_body(node)
+        body = self.visit_body(node["body"])
         if not isinstance(body, list):
             body = [body]
         body.append(update)
@@ -637,7 +635,7 @@ class ASTConverter:
         return For(
             iter=self.visit(node["right"]),
             target=target,
-            body=self.visit_body(node),
+            body=self.visit_body(node["body"]),
             orelse=[],
         )
 
@@ -675,7 +673,7 @@ class ASTConverter:
     def visit_FunctionExpression(self, node: dict):
         node_body = node["body"]
 
-        if len(node_body["body"]) != 1:
+        if len(node_body["body"]) > 1:
             func_name = "local_anonymous_func"
             if node.get("id"):
                 func_name = node["id"]["name"]
@@ -746,7 +744,7 @@ class ASTConverter:
             body = list(itertools.takewhile(lambda c: not isinstance(c, Break), all_cases))
 
             if body == []:
-                body += [Expr(Name(id="pass"))]
+                body += [Expr(Constant(value=Ellipsis))]
 
             cases.append(match_case(pattern=pattern, body=body))
 

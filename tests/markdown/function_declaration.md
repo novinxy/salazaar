@@ -140,8 +140,8 @@ function Test2() { }
 Python:
 ```py
 def Test1():
-    pass
+    ...
 
 def Test2():
-    pass
+    ...
 ```

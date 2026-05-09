@@ -144,7 +144,7 @@ match status:
     case 'ok':
         result = True
     case _:
-        pass
+        ...
 ```
 
 ## Test case: empty switch
@@ -161,9 +161,9 @@ Python:
 ```py
 match status:
     case 'ok':
-        pass
+        ...
     case _:
-        pass
+        ...
 ```
 
 

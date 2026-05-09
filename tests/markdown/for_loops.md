@@ -9,7 +9,7 @@ for (const i in collection) {
 Python:
 ```py
 for i in range(len(collection)):
-    pass
+    ...
 ```
 
 
@@ -63,7 +63,7 @@ for (const elem of collection) {
 Python:
 ```py
 for elem in collection:
-    pass
+    ...
 ```
 
 ## Test case: for loop ascending
@@ -101,7 +101,7 @@ Python:
 ```py
 index = 0
 while index < len(array):
-    pass
+    ...
     index += 1
 ```
 
