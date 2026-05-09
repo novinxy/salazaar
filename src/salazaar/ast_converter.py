@@ -813,7 +813,7 @@ class ASTConverter:
         return ClassDef(
             name=node["id"]["name"],
             bases=bases,
-            body=self.visit(node["body"]),
+            body=self.visit_or_ellipsis(node["body"]),
         )
 
     def visit_ClassBody(self, node: dict):

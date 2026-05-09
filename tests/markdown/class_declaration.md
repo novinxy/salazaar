@@ -199,3 +199,16 @@ class Rectangle:
     def getName():
         return 'Rectangle'
 ```
+
+## Test case: empty Class
+JavaScript:
+```js
+class Rectangle {
+};
+```
+
+Python:
+```py
+class Rectangle:
+    ...
+```
