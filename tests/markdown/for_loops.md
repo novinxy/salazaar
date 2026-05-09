@@ -1,3 +1,18 @@
+## Test case: for in empty
+JavaScript:
+```js
+for (const i in collection) {
+}
+
+```
+
+Python:
+```py
+for i in range(len(collection)):
+    pass
+```
+
+
 ## Test case: for in
 JavaScript:
 ```js

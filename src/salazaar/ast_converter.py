@@ -468,9 +468,17 @@ class ASTConverter:
 
         return Assign(targets=targets, value=value)
 
+    def visit_body(self, node: dict) -> list[expr]:
+        body_statements = node["body"]
+
+        body = self.visit(body_statements)
+        if body == []:
+            body += [Expr(Name(id="pass"))]
+        return body
+
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
-        body = self.visit(node["body"])
+        body = self.visit_body(node)
 
         args, defaults = self.parse_function_params(node["params"])
 
@@ -552,7 +560,7 @@ class ASTConverter:
             keywords=[],
         )
 
-        body = self.visit(node["body"])
+        body = self.visit_body(node)
 
         target = self.visit(node["left"])
         if node["left"]["type"] == "VariableDeclaration":

@@ -127,3 +127,21 @@ def Test1():
 def Test2():
     tmp = 10
 ```
+
+### Test case: empty function
+JavaScript:
+```js
+function Test1() {
+}
+
+function Test2() { }
+```
+
+Python:
+```py
+def Test1():
+    pass
+
+def Test2():
+    pass
+```
