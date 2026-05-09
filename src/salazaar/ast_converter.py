@@ -590,7 +590,7 @@ class ASTConverter:
         if isinstance(update, expr):
             update = Expr(value=update)
 
-        body = self.visit(node["body"])
+        body = self.visit_body(node)
         if not isinstance(body, list):
             body = [body]
         body.append(update)

@@ -90,7 +90,38 @@ while index < len(array):
     index += 1
 ```
 
+## Test case: for loop ascending empty
+JavaScript:
+```js
+for (let index = 0; index < array.length; index++) {
+}
+```
+
+Python:
+```py
+index = 0
+while index < len(array):
+    pass
+    index += 1
+```
+
 ## Test case: for loop descending
+JavaScript:
+```js
+for (let index = array.length - 1; index >= 0; index--) {
+    const element = array[index];
+}
+```
+
+Python:
+```py
+index = len(array) - 1
+while index >= 0:
+    element = array[index]
+    index -= 1
+```
+
+## Test case: for loop descending empty
 JavaScript:
 ```js
 for (let index = array.length - 1; index >= 0; index--) {
