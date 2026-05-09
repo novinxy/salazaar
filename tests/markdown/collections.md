@@ -126,3 +126,18 @@ Python:
 ```py
 value = array.pop()
 ```
+
+## Test case: array slice
+JavaScript:
+```js
+let values = array.slice()
+let values = array.slice(1)
+let values = array.slice(1, 3)
+```
+
+Python:
+```py
+values = array
+values = array[1:]
+values = array[1:3]
+```

@@ -372,6 +372,19 @@ class ASTConverter:
                     join_char = args[0]
                 return Call(func=Attribute(value=join_char, attr="join"), args=[self.visit(callee["object"])])
 
+            if callee["property"]["name"] == "slice":
+                if len(args) == 1:
+                    return Subscript(
+                        value=self.visit(callee["object"]),
+                        slice=Slice(lower=args[0]),
+                    )
+                if len(args) == 2:
+                    return Subscript(
+                        value=self.visit(callee["object"]),
+                        slice=Slice(lower=args[0], upper=args[1]),
+                    )
+                return self.visit(callee["object"])
+
             if callee["property"]["name"] == "exec":
                 self.imports.add("re")
                 return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
