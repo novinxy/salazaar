@@ -468,7 +468,7 @@ class ASTConverter:
 
         return Assign(targets=targets, value=value)
 
-    def visit_body(self, body: list[dict]) -> list[expr]:
+    def visit_or_ellipsis(self, body: list[dict]) -> list[expr]:
         body = self.visit(body)
         if body == []:
             body += [Expr(Constant(value=Ellipsis))]
@@ -478,7 +478,7 @@ class ASTConverter:
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
-        body = self.visit_body(node["body"])
+        body = self.visit_or_ellipsis(node["body"])
 
         args, defaults = self.parse_function_params(node["params"])
 
@@ -560,7 +560,7 @@ class ASTConverter:
             keywords=[],
         )
 
-        body = self.visit_body(node["body"])
+        body = self.visit_or_ellipsis(node["body"])
 
         target = self.visit(node["left"])
         if node["left"]["type"] == "VariableDeclaration":
@@ -590,7 +590,7 @@ class ASTConverter:
         if isinstance(update, expr):
             update = Expr(value=update)
 
-        body = self.visit_body(node["body"])
+        body = self.visit_or_ellipsis(node["body"])
         if not isinstance(body, list):
             body = [body]
         body.append(update)
@@ -637,7 +637,7 @@ class ASTConverter:
         return For(
             iter=self.visit(node["right"]),
             target=target,
-            body=self.visit_body(node["body"]),
+            body=self.visit_or_ellipsis(node["body"]),
             orelse=[],
         )
 
@@ -722,7 +722,7 @@ class ASTConverter:
 
             return Name(id="local_anonymous_func")
 
-        body = self.visit_body(node_body)[0]
+        body = self.visit_or_ellipsis(node_body)[0]
 
         if isinstance(body, Expr) or isinstance(body, Return):
             body = body.value
@@ -760,10 +760,14 @@ class ASTConverter:
         # it's not needed in other places and is safer that way
         # I'm thinking if maybe we should write special method for it and wrap calls
 
+        finalbody = []
+        if "finalizer" in node:
+            finalbody = self.visit_or_ellipsis(node["finalizer"])
+
         return Try(
-            body=self.visit(node["block"]),
+            body=self.visit_or_ellipsis(node["block"]),
             handlers=[self.visit(node.get("handler"), [])],
-            finalbody=self.visit(node.get("finalizer"), []),
+            finalbody=finalbody,
         )
 
     def visit_CatchClause(self, node: dict):
@@ -773,7 +777,7 @@ class ASTConverter:
         return ExceptHandler(
             type=Name(id="Exception"),
             name=node["param"]["name"],
-            body=[self.visit(b) for b in node["body"]["body"]],
+            body=self.visit_or_ellipsis(node["body"]),
         )
 
     def visit_ThrowStatement(self, node: dict):

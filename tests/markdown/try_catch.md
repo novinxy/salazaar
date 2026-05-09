@@ -140,3 +140,24 @@ try:
 except Exception as e:
     raise e
 ```
+
+
+## Test case: empty try-catch-finally
+
+JavaScript
+```js
+try {
+} catch (err) {
+} finally {
+}
+```
+
+Python
+```py
+try:
+    ...
+except Exception as err:
+    ...
+finally:
+    ...
+```
