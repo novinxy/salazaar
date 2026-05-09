@@ -434,6 +434,10 @@ class ASTConverter:
             if callee["property"]["name"] == "toUpperCase":
                 return Call(func=Attribute(value=self.visit(callee["object"]), attr="upper"), args=[])
 
+            if callee["property"]["name"] == "toString":
+                params = [self.visit(callee["object"])]
+                return Call(func=Name(id="str"), args=params)
+
         func = self.visit(callee)
 
         return Call(func=func, args=args, keywords=[])

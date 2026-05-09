@@ -140,3 +140,16 @@ Python:
 ```py
 var1 = value[3:]
 ```
+
+## Test case: toString
+JavaScript:
+```js
+var1 = value.toString()
+var2 = value2.child.toString()
+```
+
+Python:
+```py
+var1 = str(value)
+var2 = str(value2.child)
+```
