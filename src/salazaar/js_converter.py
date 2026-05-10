@@ -49,7 +49,8 @@ operators: dict[str, Any] = {
 
 
 class JsConverter:
-    def __init__(self):
+    def __init__(self, unsafe_fixes: bool = False):
+        self.unsafe_fixes = unsafe_fixes
         self.injected_blocks = []
         self.imports: set[str] = set()
 
@@ -170,7 +171,7 @@ class JsConverter:
         return declarations
 
     def visit_Literal(self, node: dict) -> ast.Constant | RawString:
-        if "regex" in node:
+        if "regex" in node and self.unsafe_fixes:
             self.add_import("re")
 
             return ast.Call(
@@ -277,7 +278,7 @@ class JsConverter:
         if callee["type"] == "Super":
             return ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id="super")), attr="__init__"))
 
-        if callee["type"] == "MemberExpression":
+        if callee["type"] == "MemberExpression" and self.unsafe_fixes:
             # JSON functions
             if callee["object"].get("name") == "JSON":
                 if callee["property"]["name"] == "parse":
@@ -598,7 +599,7 @@ class JsConverter:
         if node["computed"]:
             return ast.Subscript(value=value, slice=self.visit(node["property"]))
 
-        if node["property"]["name"] == "length":
+        if node["property"]["name"] == "length" and self.unsafe_fixes:
             params = [self.visit(node["object"])]
             return ast.Call(func=ast.Name(id="len"), args=params)
 
@@ -835,7 +836,7 @@ class JsConverter:
         return ast.JoinedStr(values=joined_str)
 
     def visit_NewExpression(self, node: dict):
-        if node["callee"]["name"] == "RegExp":
+        if node["callee"]["name"] == "RegExp" and self.unsafe_fixes:
             self.add_import("re")
 
             regexp_value = self.visit(node["arguments"][0])

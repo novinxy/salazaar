@@ -21,7 +21,7 @@ def test_{test_name}():
 """.strip()
 
     # Act
-    result = salazaar.translate(js)
+    result = salazaar.translate(js, unsafe_fixes=True)
 
     # Assert
     assert result.strip() == py.strip(), f"Expected: {{py}}, but got: {{result}}"
