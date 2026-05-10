@@ -1,6 +1,6 @@
 [project]
 name = "salazaar"
-description = "salaazaar is a library for transpiling JavaScript code to Python code."
+description = "library for transpiling JavaScript code to Python code."
 authors = [
     { name = "Grzegorz Nowiński", email = "grzesiekn1001@gmail.com"}
 ]
