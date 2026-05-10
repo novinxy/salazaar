@@ -49,8 +49,9 @@ operators: dict[str, Any] = {
 
 
 class JsConverter:
-    def __init__(self, unsafe_fixes: bool = False):
+    def __init__(self, unsafe_fixes: bool = False, comments: bool = False):
         self.unsafe_fixes = unsafe_fixes
+        self.comments = comments
         self.injected_blocks = []
         self.imports: set[str] = set()
 
@@ -84,7 +85,7 @@ class JsConverter:
         if visit_impl is None:
             raise NotImplementedError(f'Method "{method}"" is not implemented')
 
-        if "leadingComments" not in node:
+        if "leadingComments" not in node or not self.comments:
             return visit_impl(node)
 
         comments = self.get_comments(node)
