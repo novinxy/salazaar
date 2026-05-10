@@ -278,6 +278,17 @@ class JsConverter:
             return ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id="super")), attr="__init__"))
 
         if callee["type"] == "MemberExpression":
+            # JSON functions
+            if callee["object"].get("name") == "JSON":
+                if callee["property"]["name"] == "parse":
+                    self.add_import("json")
+                    return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="loads"), args=args)
+
+                if callee["property"]["name"] == "stringify":
+                    self.add_import("json")
+                    return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="dumps"), args=args)
+
+            # list operations
             if callee["property"]["name"] == "concat":
 
                 def concat(argNum):
@@ -300,11 +311,12 @@ class JsConverter:
             if callee["property"]["name"] == "push":
                 if len(args) <= 1:
                     return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="append"), args=args)
-                else:
-                    return ast.Call(
-                        func=ast.Attribute(value=self.visit(callee["object"]), attr="extend"),
-                        args=[ast.List(elts=args)],
-                    )
+
+                return ast.Call(
+                    func=ast.Attribute(value=self.visit(callee["object"]), attr="extend"),
+                    args=[ast.List(elts=args)],
+                )
+
             if callee["property"]["name"] == "join":
                 join_char = ast.Constant(value="")
                 if args:
@@ -339,7 +351,7 @@ class JsConverter:
                             )
                         ],
                     )
-
+            # string/ RegExp functions
             if callee["property"]["name"] == "exec":
                 self.add_import("re")
                 return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
@@ -359,15 +371,6 @@ class JsConverter:
                 self.add_import("re")
                 return ast.Call(func=ast.Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
 
-            if callee["object"].get("name") == "JSON":
-                if callee["property"]["name"] == "parse":
-                    self.add_import("json")
-                    return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="loads"), args=args)
-
-                if callee["property"]["name"] == "stringify":
-                    self.add_import("json")
-                    return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="dumps"), args=args)
-
             if callee["property"]["name"] == "trim":
                 return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="strip"), args=args)
 
@@ -380,6 +383,7 @@ class JsConverter:
                         slice=ast.Slice(upper=args[1]),
                     )
                 return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="split"), args=args)
+
             if callee["property"]["name"] == "substr":
                 if len(args) == 1:
                     return ast.Subscript(
