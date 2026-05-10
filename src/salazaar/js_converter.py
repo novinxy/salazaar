@@ -71,21 +71,20 @@ class JsConverter:
         if visitor is None:
             raise NotImplementedError(f'Method "{method}"" is not implemented')
 
-        if "leadingComments" in node:
-            leading_comments: list[dict] = node["leadingComments"]
-            comments = []
-            for comment in leading_comments:
-                if comment["type"] == "Block":
-                    comments += [Comment(value=c) for c in comment["value"].splitlines()]
-                else:
-                    comments += [Comment(value=comment["value"])]
-            res = visitor(node)
-            if isinstance(res, list):
-                return comments + res
-            else:
-                return comments + [res]
-        else:
+        if "leadingComments" not in node:
             return visitor(node)
+
+        comments = []
+        for comment in node["leadingComments"]:
+            if comment["type"] == "Block":
+                comments += [Comment(value=c) for c in comment["value"].splitlines()]
+            else:
+                comments += [Comment(value=comment["value"])]
+
+        res = visitor(node)
+        if isinstance(res, list):
+            return comments + res
+        return comments + [res]
 
     def visit_EmptyStatement(self, _: dict):
         return Empty()
