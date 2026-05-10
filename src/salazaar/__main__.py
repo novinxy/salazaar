@@ -23,7 +23,7 @@ def main():
     with stream_cm as f:
         content = f.read()
 
-        data_str = salazaar.translate_code(content)
+        data_str = salazaar.translate(content)
 
         print(data_str)
 

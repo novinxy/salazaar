@@ -26,7 +26,7 @@ expressions = [
 def test_logical_expressions(js):
     js_ast = esprima.parseScript(js)
 
-    py_code = salazaar.translate_code(js)
+    py_code = salazaar.translate(js)
 
     js_back = (
         py_code.replace("False", "false")
