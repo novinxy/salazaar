@@ -88,17 +88,45 @@ collection.sort()
 ```
 
 
-## Test case: sort function with function
+## Test case: sort function with short function
 JavaScript:
 ```js
 collection.sort(function compare(a,b) {
-    return a.value > b.value
+    return a.value - b.value
 })
 ```
 
 Python:
 ```py
-collection.sort(key=lambda a: a.value)
+import functools
+collection.sort(key=functools.cmp_to_key(lambda a, b: a.value - b.value))
+```
+
+## Test case: sort function with long function
+JavaScript:
+```js
+collection.sort(function compare(a,b) {
+    if (a.value > b.value) {
+        return -1
+    }
+    if (a.value < b.value) {
+        return 1
+    }
+    return 0
+})
+```
+
+Python:
+```py
+import functools
+
+def compare(a, b):
+    if a.value > b.value:
+        return -1
+    if a.value < b.value:
+        return 1
+    return 0
+collection.sort(key=functools.cmp_to_key(compare))
 ```
 
 ## Test case: array join

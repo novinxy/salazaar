@@ -4,6 +4,7 @@ from typing import Any
 import itertools
 from ast import (
     UAdd,
+    keyword,
     operator,
     ClassDef,
     FormattedValue,
@@ -384,6 +385,22 @@ class ASTConverter:
                         slice=Slice(lower=args[0], upper=args[1]),
                     )
                 return self.visit(callee["object"])
+
+            if callee["property"]["name"] == "sort":
+                if args:
+                    self.imports.add("functools")
+                    return Call(
+                        func=Attribute(value=self.visit(callee["object"]), attr="sort"),
+                        keywords=[
+                            keyword(
+                                arg="key",
+                                value=Call(
+                                    func=Attribute(value=Name(id="functools"), attr="cmp_to_key"),
+                                    args=args,
+                                ),
+                            )
+                        ],
+                    )
 
             if callee["property"]["name"] == "exec":
                 self.imports.add("re")
