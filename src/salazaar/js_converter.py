@@ -53,6 +53,14 @@ class JsConverter:
         self.injected_blocks = []
         self.imports = set()
 
+    def prepend_to_parent(self, *block: ast.stmt):
+        self.injected_blocks.extend(block)
+
+    def prepend_from_child(self, body: list[ast.stmt]):
+        if self.injected_blocks:
+            body += self.injected_blocks
+            self.injected_blocks = []
+
     def visit(self, node: dict | None, default=None) -> Any:
         if node is None:
             return default
@@ -93,11 +101,7 @@ class JsConverter:
             if not isinstance(n, list):
                 n = [n]
 
-            # TODO novinxy: maybe instead of simple appends we should provide simple function ?
-            if self.injected_blocks:
-                body += self.injected_blocks
-                self.injected_blocks = []
-
+            self.prepend_from_child(body)
             body += n
 
         body = [ast.Import(names=[ast.alias(i)]) for i in self.imports] + body
@@ -478,9 +482,7 @@ class JsConverter:
             if not isinstance(expression, list):
                 expression = [expression]
 
-            if self.injected_blocks:
-                block += self.injected_blocks
-                self.injected_blocks = []
+            self.prepend_from_child(block)
 
             block += expression
 
@@ -649,8 +651,7 @@ class JsConverter:
 
             args, defaults = self.parse_function_params(node["params"])
 
-            # TODO novinxy: instead of of append add some simple abstraction
-            self.injected_blocks.append(
+            self.prepend_to_parent(
                 ast.FunctionDef(
                     name=func_name,
                     args=ast.arguments(args=args, defaults=defaults),
@@ -679,7 +680,7 @@ class JsConverter:
         if node_body["type"] == "BlockStatement" and len(node_body["body"]) > 1:
             args, defaults = self.parse_function_params(node["params"])
 
-            self.injected_blocks.append(
+            self.prepend_to_parent(
                 ast.FunctionDef(
                     name="local_anonymous_func",
                     args=ast.arguments(args=args, defaults=defaults),
