@@ -4,7 +4,7 @@ from typing import Any
 import itertools
 import ast
 
-from salazaar.ext_types import Empty, RawString, Comment
+from salazaar.extra_types import Empty, RawString, Comment
 
 
 def is_typeof(node: dict):

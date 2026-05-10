@@ -7,7 +7,7 @@ if sys.version_info < (3, 14):
 else:
     from _ast_unparse import Unparser
 
-from salazaar.ext_types import Empty, RawString, Comment
+from salazaar.extra_types import Empty, RawString, Comment
 
 
 class Parser(Unparser):
