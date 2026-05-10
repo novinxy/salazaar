@@ -51,7 +51,10 @@ operators: dict[str, Any] = {
 class JsConverter:
     def __init__(self):
         self.injected_blocks = []
-        self.imports = set()
+        self.imports: set[str] = set()
+
+    def add_import(self, import_: str):
+        self.imports.add(import_)
 
     def prepend_to_parent(self, *block: ast.stmt):
         self.injected_blocks.extend(block)
@@ -61,27 +64,31 @@ class JsConverter:
             body += self.injected_blocks
             self.injected_blocks = []
 
-    def visit(self, node: dict | None, default=None) -> Any:
-        if node is None:
-            return default
-
-        method = f"visit_{node['type']}"
-        visitor = getattr(self, method)
-
-        if visitor is None:
-            raise NotImplementedError(f'Method "{method}"" is not implemented')
-
-        if "leadingComments" not in node:
-            return visitor(node)
-
+    def get_comments(self, node: dict) -> list[Comment]:
         comments = []
         for comment in node["leadingComments"]:
             if comment["type"] == "Block":
                 comments += [Comment(value=c) for c in comment["value"].splitlines()]
             else:
                 comments += [Comment(value=comment["value"])]
+        return comments
 
-        res = visitor(node)
+    def visit(self, node: dict | None, default=None) -> Any:
+        if node is None:
+            return default
+
+        method = f"visit_{node['type']}"
+        visit_impl = getattr(self, method)
+
+        if visit_impl is None:
+            raise NotImplementedError(f'Method "{method}"" is not implemented')
+
+        if "leadingComments" not in node:
+            return visit_impl(node)
+
+        comments = self.get_comments(node)
+
+        res = visit_impl(node)
         if isinstance(res, list):
             return comments + res
         return comments + [res]
@@ -93,15 +100,15 @@ class JsConverter:
         nodes = [self.visit(n) for n in node["body"]]
         body = []
 
-        for n in nodes:
-            if n is None:
+        for node in nodes:
+            if node is None:
                 continue
 
-            if not isinstance(n, list):
-                n = [n]
+            if not isinstance(node, list):
+                node = [node]
 
             self.prepend_from_child(body)
-            body += n
+            body += node
 
         body = [ast.Import(names=[ast.alias(i)]) for i in self.imports] + body
         return ast.Module(body=body, type_ignores=[])
@@ -164,7 +171,7 @@ class JsConverter:
 
     def visit_Literal(self, node: dict) -> ast.Constant | RawString:
         if "regex" in node:
-            self.imports.add("re")
+            self.add_import("re")
 
             return ast.Call(
                 func=ast.Attribute(value=ast.Name(id="re"), attr="compile"),
@@ -198,8 +205,6 @@ class JsConverter:
 
     def visit_ExpressionStatement(self, node: dict):
         if node["expression"]["type"] in ("CallExpression", "MemberExpression", "BinaryExpression"):
-            # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
-
             return ast.Expr(self.visit(node["expression"]))
         return self.visit(node["expression"])
 
@@ -321,7 +326,7 @@ class JsConverter:
 
             if callee["property"]["name"] == "sort":
                 if args:
-                    self.imports.add("functools")
+                    self.add_import("functools")
                     return ast.Call(
                         func=ast.Attribute(value=self.visit(callee["object"]), attr="sort"),
                         keywords=[
@@ -336,31 +341,31 @@ class JsConverter:
                     )
 
             if callee["property"]["name"] == "exec":
-                self.imports.add("re")
+                self.add_import("re")
                 return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
 
             if callee["property"]["name"] == "test":
-                self.imports.add("re")
+                self.add_import("re")
                 return ast.Call(
                     func=ast.Name(id="bool"),
                     args=[ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="search"), args=args)],
                 )
 
             if callee["property"]["name"] == "matchAll":
-                self.imports.add("re")
+                self.add_import("re")
                 return ast.Call(func=ast.Attribute(value=args[0], attr="finditer"), args=[self.visit(callee["object"])])
 
             if callee["property"]["name"] == "match":
-                self.imports.add("re")
+                self.add_import("re")
                 return ast.Call(func=ast.Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
 
             if callee["object"].get("name") == "JSON":
                 if callee["property"]["name"] == "parse":
-                    self.imports.add("json")
+                    self.add_import("json")
                     return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="loads"), args=args)
 
                 if callee["property"]["name"] == "stringify":
-                    self.imports.add("json")
+                    self.add_import("json")
                     return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="dumps"), args=args)
 
             if callee["property"]["name"] == "trim":
@@ -427,7 +432,6 @@ class JsConverter:
                 value=self.visit(node["right"]),
             )
 
-        # TODO GRNO 2025-08-19 : one again check it. I remember that it was for case with multiple assignments. But I need to double check it
         targets = [self.visit(node["left"])]
         rhs = node["right"]
 
@@ -488,15 +492,14 @@ class JsConverter:
         return block
 
     def visit_LogicalExpression(self, node: dict):
-        # TODO GRNO 2025-08-14 : hate this function. We should quickly fix this one
         values = []
 
-        def parse_left(obj, op):
+        def parse_left(obj: dict, op: str):
             if obj["type"] == "LogicalExpression" and op == obj["operator"]:
-                values1 = []
-                values1 += parse_left(obj["left"], obj["operator"])
-                values1.append(self.visit(obj["right"]))
-                return values1
+                values = []
+                values += parse_left(obj["left"], obj["operator"])
+                values.append(self.visit(obj["right"]))
+                return values
 
             return [self.visit(obj)]
 
@@ -725,10 +728,6 @@ class JsConverter:
         return ast.Match(subject=self.visit(node["discriminant"]), cases=cases)
 
     def visit_TryStatement(self, node: dict):
-        # somehow bodies in here work strange as they are missing Expression for CallExpressions
-        # it's not needed in other places and is safer that way
-        # I'm thinking if maybe we should write special method for it and wrap calls
-
         finalbody = []
         if "finalizer" in node:
             finalbody = self.visit(node["finalizer"])
@@ -740,9 +739,6 @@ class JsConverter:
         )
 
     def visit_CatchClause(self, node: dict):
-        # somehow bodies in here work strange as they are missing Expression for CallExpressions
-        # it's not needed in other places and is safer that way
-        # I'm thinking if maybe we should write special method for it and wrap calls
         return ast.ExceptHandler(
             type=ast.Name(id="Exception"),
             name=node["param"]["name"],
@@ -836,7 +832,7 @@ class JsConverter:
 
     def visit_NewExpression(self, node: dict):
         if node["callee"]["name"] == "RegExp":
-            self.imports.add("re")
+            self.add_import("re")
 
             regexp_value = self.visit(node["arguments"][0])
             if node["arguments"][0]["type"] == "Literal":
