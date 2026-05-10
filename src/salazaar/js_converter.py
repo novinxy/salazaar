@@ -291,25 +291,6 @@ class JsConverter:
                     return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="dumps"), args=args)
 
             # list operations
-            if callee["property"]["name"] == "concat":
-
-                def concat(argNum):
-                    argNum -= 1
-                    if argNum == 0:
-                        return ast.BinOp(
-                            left=self.visit(callee["object"]),
-                            op=ast.Add(),
-                            right=args[argNum],
-                        )
-
-                    return ast.BinOp(
-                        left=concat(argNum),
-                        op=ast.Add(),
-                        right=args[argNum],
-                    )
-
-                return concat(len(args))
-
             if callee["property"]["name"] == "push":
                 if len(args) <= 1:
                     return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="append"), args=args)
@@ -419,6 +400,25 @@ class JsConverter:
             if callee["property"]["name"] == "toString":
                 params = [self.visit(callee["object"])]
                 return ast.Call(func=ast.Name(id="str"), args=params)
+
+            if callee["property"]["name"] == "concat":
+
+                def concat(argNum):
+                    argNum -= 1
+                    if argNum == 0:
+                        return ast.BinOp(
+                            left=self.visit(callee["object"]),
+                            op=ast.Add(),
+                            right=args[argNum],
+                        )
+
+                    return ast.BinOp(
+                        left=concat(argNum),
+                        op=ast.Add(),
+                        right=args[argNum],
+                    )
+
+                return concat(len(args))
 
         func = self.visit(callee)
 
