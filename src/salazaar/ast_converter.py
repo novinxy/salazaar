@@ -2,80 +2,9 @@ import re
 from typing import Any
 
 import itertools
-from ast import (
-    UAdd,
-    keyword,
-    operator,
-    ClassDef,
-    FormattedValue,
-    JoinedStr,
-    alias,
-    Add,
-    And,
-    Assign,
-    Attribute,
-    AugAssign,
-    BinOp,
-    BitAnd,
-    BitOr,
-    BitXor,
-    BoolOp,
-    Break,
-    Call,
-    Compare,
-    Constant,
-    Continue,
-    Dict,
-    Div,
-    Eq,
-    ExceptHandler,
-    Expr,
-    For,
-    FunctionDef,
-    Gt,
-    GtE,
-    If,
-    IfExp,
-    Import,
-    ImportFrom,
-    Invert,
-    Is,
-    IsNot,
-    LShift,
-    Lambda,
-    List,
-    Lt,
-    LtE,
-    Match,
-    Mod,
-    Module,
-    Mult,
-    Name,
-    Not,
-    NotEq,
-    Or,
-    Pow,
-    RShift,
-    Raise,
-    Return,
-    Sub,
-    Subscript,
-    Try,
-    Tuple,
-    USub,
-    UnaryOp,
-    While,
-    arg,
-    arguments,
-    cmpop,
-    expr,
-    match_case,
-    Slice,
-)
+import ast
 
 from salazaar.ext_types import Empty, RawString, Comment
-
-# pylint: disable=invalid-name
 
 
 def is_typeof(node: dict):
@@ -83,39 +12,39 @@ def is_typeof(node: dict):
 
 
 operators: dict[str, Any] = {
-    "==": Eq(),
-    "!=": NotEq(),
-    "===": Eq(),
-    "!==": NotEq(),
-    ">": Gt(),
-    ">=": GtE(),
-    "<": Lt(),
-    "<=": LtE(),
-    "+": Add(),
-    "-": Sub(),
-    "*": Mult(),
-    "/": Div(),
-    "%": Mod(),
-    "**": Pow(),
-    "<<": LShift(),
-    ">>": RShift(),
-    "|": BitOr(),
-    "^": BitXor(),
-    "&": BitAnd(),
-    "++": Add(),
-    "--": Sub(),
-    "+=": Add(),
-    "-=": Sub(),
-    "*=": Mult(),
-    "/=": Div(),
-    "%=": Mod(),
-    "<<=": LShift(),
-    ">>=": RShift(),
-    "|=": BitOr(),
-    "^=": BitXor(),
-    "&=": BitAnd(),
-    "&&": And(),
-    "||": Or(),
+    "==": ast.Eq(),
+    "!=": ast.NotEq(),
+    "===": ast.Eq(),
+    "!==": ast.NotEq(),
+    ">": ast.Gt(),
+    ">=": ast.GtE(),
+    "<": ast.Lt(),
+    "<=": ast.LtE(),
+    "+": ast.Add(),
+    "-": ast.Sub(),
+    "*": ast.Mult(),
+    "/": ast.Div(),
+    "%": ast.Mod(),
+    "**": ast.Pow(),
+    "<<": ast.LShift(),
+    ">>": ast.RShift(),
+    "|": ast.BitOr(),
+    "^": ast.BitXor(),
+    "&": ast.BitAnd(),
+    "++": ast.Add(),
+    "--": ast.Sub(),
+    "+=": ast.Add(),
+    "-=": ast.Sub(),
+    "*=": ast.Mult(),
+    "/=": ast.Div(),
+    "%=": ast.Mod(),
+    "<<=": ast.LShift(),
+    ">>=": ast.RShift(),
+    "|=": ast.BitOr(),
+    "^=": ast.BitXor(),
+    "&=": ast.BitAnd(),
+    "&&": ast.And(),
+    "||": ast.Or(),
 }
 
 
@@ -153,7 +82,7 @@ class ASTConverter:
     def visit_EmptyStatement(self, _: dict):
         return Empty()
 
-    def visit_Program(self, node: dict) -> Module:
+    def visit_Program(self, node: dict) -> ast.Module:
         nodes = [self.visit(n) for n in node["body"]]
         body = []
 
@@ -171,14 +100,14 @@ class ASTConverter:
 
             body += n
 
-        body = [Import(names=[alias(i)]) for i in self.imports] + body
-        return Module(body=body, type_ignores=[])
+        body = [ast.Import(names=[ast.alias(i)]) for i in self.imports] + body
+        return ast.Module(body=body, type_ignores=[])
 
     def visit_UpdateExpression(self, node: dict):
-        return AugAssign(
+        return ast.AugAssign(
             target=self.visit(node["argument"]),
             op=operators[node["operator"]],
-            value=Constant(value=1),
+            value=ast.Constant(value=1),
         )
 
     def visit_VariableDeclaration(self, node: dict):
@@ -186,15 +115,15 @@ class ASTConverter:
         for declaration in node["declarations"]:
             if declaration["id"]["type"] == "ArrayPattern":
                 declarations.append(
-                    Assign(
-                        targets=[Tuple(elts=[Name(i["name"]) for i in declaration["id"]["elements"]])],
-                        value=Tuple(elts=[self.visit(e) for e in declaration["init"]["elements"]]),
+                    ast.Assign(
+                        targets=[ast.Tuple(elts=[ast.Name(i["name"]) for i in declaration["id"]["elements"]])],
+                        value=ast.Tuple(elts=[self.visit(e) for e in declaration["init"]["elements"]]),
                     )
                 )
 
                 return declarations
 
-            targets = [Name(id=declaration["id"]["name"])]
+            targets = [ast.Name(id=declaration["id"]["name"])]
             assigned_value = declaration.get("init", {"raw": "null", "type": "Literal", "value": "null"})
 
             match assigned_value["type"]:
@@ -203,9 +132,9 @@ class ASTConverter:
                     targets += value.targets
                     value = value.value
                 case "FunctionExpression" if len(assigned_value["body"]["body"]) > 1:
-                    return FunctionDef(
+                    return ast.FunctionDef(
                         name=declaration["id"]["name"],
-                        args=arguments(args=[arg(p["name"]) for p in assigned_value["params"]]),
+                        args=ast.arguments(args=[ast.arg(p["name"]) for p in assigned_value["params"]]),
                         body=self.visit(assigned_value["body"]),
                     )
                 case "ClassExpression":
@@ -213,7 +142,7 @@ class ASTConverter:
                     if base := assigned_value.get("superClass"):
                         bases = [self.visit(base)]
 
-                    return ClassDef(
+                    return ast.ClassDef(
                         name=declaration["id"]["name"],
                         bases=bases,
                         body=self.visit(assigned_value["body"]),
@@ -222,7 +151,7 @@ class ASTConverter:
                     value = self.visit(assigned_value)
 
             declarations.append(
-                Assign(
+                ast.Assign(
                     targets=targets,
                     value=value,
                 )
@@ -230,28 +159,28 @@ class ASTConverter:
 
         return declarations
 
-    def visit_Literal(self, node: dict) -> Constant | RawString:
+    def visit_Literal(self, node: dict) -> ast.Constant | RawString:
         if "regex" in node:
             self.imports.add("re")
 
-            return Call(
-                func=Attribute(value=Name(id="re"), attr="compile"),
+            return ast.Call(
+                func=ast.Attribute(value=ast.Name(id="re"), attr="compile"),
                 args=[RawString(value=node["regex"]["pattern"])],
                 keywords=[],
             )
 
         value = node.get("value", "null")
         if value in ("undefined", "null"):
-            return Constant(value=None)
+            return ast.Constant(value=None)
 
         if isinstance(value, re.Pattern):
             return RawString(value=value.pattern)
-        return Constant(value=value)
+        return ast.Constant(value=value)
 
-    def visit_Identifier(self, node: dict) -> expr:
+    def visit_Identifier(self, node: dict) -> ast.expr:
         name = node["name"]
         if name in ("undefined", "null"):
-            return Constant(value=None)
+            return ast.Constant(value=None)
 
         mapping = {
             "Boolean": "bool",
@@ -260,15 +189,15 @@ class ASTConverter:
         }
 
         if name in mapping.keys():
-            return Name(id=mapping[name])
+            return ast.Name(id=mapping[name])
 
-        return Name(id=name)
+        return ast.Name(id=name)
 
     def visit_ExpressionStatement(self, node: dict):
         if node["expression"]["type"] in ("CallExpression", "MemberExpression", "BinaryExpression"):
             # TODO GRNO 2025-09-08 : This function creates issues with lambdas calls. Maybe there is other way around to write it in more elegant or direct way. Maybe we should only use Expr when we need it? But I guess that knowledge is only know if we know parent
 
-            return Expr(self.visit(node["expression"]))
+            return ast.Expr(self.visit(node["expression"]))
         return self.visit(node["expression"])
 
     def visit_compare_typeof(self, node: dict):
@@ -279,17 +208,17 @@ class ASTConverter:
             left_arg = self.visit(node["left"]["argument"])
             right_arg = self.visit(node["right"]["argument"])
 
-            return Compare(
-                left=Call(func=Name(id="type"), args=[left_arg], keywords=[]),
+            return ast.Compare(
+                left=ast.Call(func=ast.Name(id="type"), args=[left_arg], keywords=[]),
                 ops=[op],
-                comparators=[Call(func=Name(id="type"), args=[right_arg], keywords=[])],
+                comparators=[ast.Call(func=ast.Name(id="type"), args=[right_arg], keywords=[])],
             )
 
         type_map = {
-            "string": Name(id="str"),
-            "number": Tuple(elts=[Name(id="int"), Name(id="float")]),
-            "boolean": Name(id="bool"),
-            "object": Name(id="object"),
+            "string": ast.Name(id="str"),
+            "number": ast.Tuple(elts=[ast.Name(id="int"), ast.Name(id="float")]),
+            "boolean": ast.Name(id="bool"),
+            "object": ast.Name(id="object"),
         }
 
         if is_typeof(node["left"]):
@@ -300,14 +229,14 @@ class ASTConverter:
             type_str = node["left"]["value"]
 
         if type_str == "undefined":
-            op = Is() if isinstance(op, Eq) else IsNot()
-            return Compare(left=argument, ops=[op], comparators=[Constant(value=None)])
+            op = ast.Is() if isinstance(op, ast.Eq) else ast.IsNot()
+            return ast.Compare(left=argument, ops=[op], comparators=[ast.Constant(value=None)])
 
-        python_type = type_map.get(type_str, Name(id="object"))
-        isinstance_call = Call(func=Name(id="isinstance"), args=[argument, python_type], keywords=[])
+        python_type = type_map.get(type_str, ast.Name(id="object"))
+        isinstance_call = ast.Call(func=ast.Name(id="isinstance"), args=[argument, python_type], keywords=[])
 
-        if not isinstance(op, Eq):
-            return UnaryOp(op=Not(), operand=isinstance_call)
+        if not isinstance(op, ast.Eq):
+            return ast.UnaryOp(op=ast.Not(), operand=isinstance_call)
 
         return isinstance_call
 
@@ -321,14 +250,14 @@ class ASTConverter:
             return self.visit_compare_typeof(node)
 
         match operators.get(operator_, operator_):
-            case cmpop():
-                return Compare(left=left, ops=[operators[operator_]], comparators=[right])
-            case operator():
-                return BinOp(op=operators[operator_], left=left, right=right)
+            case ast.cmpop():
+                return ast.Compare(left=left, ops=[operators[operator_]], comparators=[right])
+            case ast.operator():
+                return ast.BinOp(op=operators[operator_], left=left, right=right)
             case "in":
-                return Call(func=Name("hasattr"), args=[right, left], keywords=[])
+                return ast.Call(func=ast.Name("hasattr"), args=[right, left], keywords=[])
             case "instanceof":
-                return Call(func=Name("isinstance"), args=[left, right], keywords=[])
+                return ast.Call(func=ast.Name("isinstance"), args=[left, right], keywords=[])
             case _:
                 raise ValueError(f"Incorrect operator: {operator_}")
 
@@ -338,7 +267,7 @@ class ASTConverter:
         callee = node["callee"]
 
         if callee["type"] == "Super":
-            return Call(func=Attribute(value=Call(func=Name(id="super")), attr="__init__"))
+            return ast.Call(func=ast.Attribute(value=ast.Call(func=ast.Name(id="super")), attr="__init__"))
 
         if callee["type"] == "MemberExpression":
             if callee["property"]["name"] == "concat":
@@ -346,15 +275,15 @@ class ASTConverter:
                 def concat(argNum):
                     argNum -= 1
                     if argNum == 0:
-                        return BinOp(
+                        return ast.BinOp(
                             left=self.visit(callee["object"]),
-                            op=Add(),
+                            op=ast.Add(),
                             right=args[argNum],
                         )
 
-                    return BinOp(
+                    return ast.BinOp(
                         left=concat(argNum),
-                        op=Add(),
+                        op=ast.Add(),
                         right=args[argNum],
                     )
 
@@ -362,40 +291,41 @@ class ASTConverter:
 
             if callee["property"]["name"] == "push":
                 if len(args) <= 1:
-                    return Call(func=Attribute(value=self.visit(callee["object"]), attr="append"), args=args)
+                    return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="append"), args=args)
                 else:
-                    return Call(
-                        func=Attribute(value=self.visit(callee["object"]), attr="extend"), args=[List(elts=args)]
+                    return ast.Call(
+                        func=ast.Attribute(value=self.visit(callee["object"]), attr="extend"),
+                        args=[ast.List(elts=args)],
                     )
             if callee["property"]["name"] == "join":
-                join_char = Constant(value="")
+                join_char = ast.Constant(value="")
                 if args:
                     join_char = args[0]
-                return Call(func=Attribute(value=join_char, attr="join"), args=[self.visit(callee["object"])])
+                return ast.Call(func=ast.Attribute(value=join_char, attr="join"), args=[self.visit(callee["object"])])
 
             if callee["property"]["name"] == "slice":
                 if len(args) == 1:
-                    return Subscript(
+                    return ast.Subscript(
                         value=self.visit(callee["object"]),
-                        slice=Slice(lower=args[0]),
+                        slice=ast.Slice(lower=args[0]),
                     )
                 if len(args) == 2:
-                    return Subscript(
+                    return ast.Subscript(
                         value=self.visit(callee["object"]),
-                        slice=Slice(lower=args[0], upper=args[1]),
+                        slice=ast.Slice(lower=args[0], upper=args[1]),
                     )
                 return self.visit(callee["object"])
 
             if callee["property"]["name"] == "sort":
                 if args:
                     self.imports.add("functools")
-                    return Call(
-                        func=Attribute(value=self.visit(callee["object"]), attr="sort"),
+                    return ast.Call(
+                        func=ast.Attribute(value=self.visit(callee["object"]), attr="sort"),
                         keywords=[
-                            keyword(
+                            ast.keyword(
                                 arg="key",
-                                value=Call(
-                                    func=Attribute(value=Name(id="functools"), attr="cmp_to_key"),
+                                value=ast.Call(
+                                    func=ast.Attribute(value=ast.Name(id="functools"), attr="cmp_to_key"),
                                     args=args,
                                 ),
                             )
@@ -404,89 +334,91 @@ class ASTConverter:
 
             if callee["property"]["name"] == "exec":
                 self.imports.add("re")
-                return Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
+                return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="search"), args=args)
 
             if callee["property"]["name"] == "test":
                 self.imports.add("re")
-                return Call(
-                    func=Name(id="bool"),
-                    args=[Call(func=Attribute(value=self.visit(callee["object"]), attr="search"), args=args)],
+                return ast.Call(
+                    func=ast.Name(id="bool"),
+                    args=[ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="search"), args=args)],
                 )
 
             if callee["property"]["name"] == "matchAll":
                 self.imports.add("re")
-                return Call(func=Attribute(value=args[0], attr="finditer"), args=[self.visit(callee["object"])])
+                return ast.Call(func=ast.Attribute(value=args[0], attr="finditer"), args=[self.visit(callee["object"])])
 
             if callee["property"]["name"] == "match":
                 self.imports.add("re")
-                return Call(func=Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
+                return ast.Call(func=ast.Attribute(value=args[0], attr="findall"), args=[self.visit(callee["object"])])
 
             if callee["object"].get("name") == "JSON":
                 if callee["property"]["name"] == "parse":
                     self.imports.add("json")
-                    return Call(func=Attribute(value=Name("json"), attr="loads"), args=args)
+                    return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="loads"), args=args)
 
                 if callee["property"]["name"] == "stringify":
                     self.imports.add("json")
-                    return Call(func=Attribute(value=Name("json"), attr="dumps"), args=args)
+                    return ast.Call(func=ast.Attribute(value=ast.Name("json"), attr="dumps"), args=args)
 
             if callee["property"]["name"] == "trim":
-                return Call(func=Attribute(value=self.visit(callee["object"]), attr="strip"), args=args)
+                return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="strip"), args=args)
 
             if callee["property"]["name"] == "split":
                 if len(args) == 2:
-                    return Subscript(
-                        value=Call(func=Attribute(value=self.visit(callee["object"]), attr="split"), args=[args[0]]),
-                        slice=Slice(upper=args[1]),
+                    return ast.Subscript(
+                        value=ast.Call(
+                            func=ast.Attribute(value=self.visit(callee["object"]), attr="split"), args=[args[0]]
+                        ),
+                        slice=ast.Slice(upper=args[1]),
                     )
-                return Call(func=Attribute(value=self.visit(callee["object"]), attr="split"), args=args)
+                return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="split"), args=args)
             if callee["property"]["name"] == "substr":
                 if len(args) == 1:
-                    return Subscript(
+                    return ast.Subscript(
                         value=self.visit(callee["object"]),
-                        slice=Slice(lower=args[0]),
+                        slice=ast.Slice(lower=args[0]),
                     )
 
-                return Subscript(
+                return ast.Subscript(
                     value=self.visit(callee["object"]),
-                    slice=Slice(lower=args[0], upper=BinOp(left=args[0], op=Add(), right=args[1])),
+                    slice=ast.Slice(lower=args[0], upper=ast.BinOp(left=args[0], op=ast.Add(), right=args[1])),
                 )
 
             if callee["property"]["name"] == "substring":
                 if len(args) == 1:
-                    return Subscript(
+                    return ast.Subscript(
                         value=self.visit(callee["object"]),
-                        slice=Slice(lower=args[0]),
+                        slice=ast.Slice(lower=args[0]),
                     )
 
-                return Subscript(
+                return ast.Subscript(
                     value=self.visit(callee["object"]),
-                    slice=Slice(lower=args[0], upper=args[1]),
+                    slice=ast.Slice(lower=args[0], upper=args[1]),
                 )
 
             if callee["property"]["name"] == "toLowerCase":
-                return Call(func=Attribute(value=self.visit(callee["object"]), attr="lower"), args=[])
+                return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="lower"), args=[])
 
             if callee["property"]["name"] == "toUpperCase":
-                return Call(func=Attribute(value=self.visit(callee["object"]), attr="upper"), args=[])
+                return ast.Call(func=ast.Attribute(value=self.visit(callee["object"]), attr="upper"), args=[])
 
             if callee["property"]["name"] == "toString":
                 params = [self.visit(callee["object"])]
-                return Call(func=Name(id="str"), args=params)
+                return ast.Call(func=ast.Name(id="str"), args=params)
 
         func = self.visit(callee)
 
-        return Call(func=func, args=args, keywords=[])
+        return ast.Call(func=func, args=args, keywords=[])
 
     def visit_ObjectExpression(self, node: dict):
         keys = [self.visit(p["key"]) for p in node["properties"]]
         values = [self.visit(p["value"]) for p in node["properties"]]
-        return Dict(keys=keys, values=values)
+        return ast.Dict(keys=keys, values=values)
 
     def visit_AssignmentExpression(self, node: dict):
         operator_ = operators.get(node["operator"], None)
         if operator_ is not None:
-            return AugAssign(
+            return ast.AugAssign(
                 target=self.visit(node["left"]),
                 op=operator_,
                 value=self.visit(node["right"]),
@@ -506,7 +438,7 @@ class ASTConverter:
         if isinstance(value, list):
             raise ValueError("Value on the assign shouldn't be list", value)
 
-        return Assign(targets=targets, value=value)
+        return ast.Assign(targets=targets, value=value)
 
     def visit_FunctionDeclaration(self, node: dict):
         name = node["id"]["name"]
@@ -514,22 +446,22 @@ class ASTConverter:
 
         args, defaults = self.parse_function_params(node["params"])
 
-        return FunctionDef(
+        return ast.FunctionDef(
             name=name,
-            args=arguments(posonlyargs=[], args=args, kwonlyargs=[], kw_defaults=[], defaults=defaults),
+            args=ast.arguments(posonlyargs=[], args=args, kwonlyargs=[], kw_defaults=[], defaults=defaults),
             body=body,
             decorator_list=[],
         )
 
-    def parse_function_params(self, params: list[dict]) -> tuple[list[arg], list[Any]]:
+    def parse_function_params(self, params: list[dict]) -> tuple[list[ast.arg], list[Any]]:
         args = []
         defaults = []
         for p in params:
             if p["type"] == "AssignmentPattern":
-                args.append(arg(arg=p["left"]["name"]))
+                args.append(ast.arg(arg=p["left"]["name"]))
                 defaults.append(self.visit(p["right"]))
             else:
-                args.append(arg(arg=p["name"]))
+                args.append(ast.arg(arg=p["name"]))
 
         return args, defaults
 
@@ -537,7 +469,7 @@ class ASTConverter:
         body = node["body"]
 
         if body == []:
-            return [Expr(Constant(value=Ellipsis))]
+            return [ast.Expr(ast.Constant(value=Ellipsis))]
 
         block = []
 
@@ -571,7 +503,7 @@ class ASTConverter:
         values += parse_left(node["left"], operator_)
         values.append(self.visit(node["right"]))
 
-        return BoolOp(op=operators[operator_], values=values)
+        return ast.BoolOp(op=operators[operator_], values=values)
 
     def visit_IfStatement(self, node: dict):
         orelse = self.visit(node.get("alternate"), [])
@@ -582,16 +514,16 @@ class ASTConverter:
         if not isinstance(body, list):
             body = [body]
 
-        return If(
+        return ast.If(
             test=self.visit(node["test"]),
             body=body,
             orelse=orelse,
         )
 
     def visit_ForInStatement(self, node: dict):
-        iter_elem = Call(
-            func=Name(id="range"),
-            args=[Call(func=Name(id="len"), args=[self.visit(node["right"])], keywords=[])],
+        iter_elem = ast.Call(
+            func=ast.Name(id="range"),
+            args=[ast.Call(func=ast.Name(id="len"), args=[self.visit(node["right"])], keywords=[])],
             keywords=[],
         )
 
@@ -599,9 +531,9 @@ class ASTConverter:
 
         target = self.visit(node["left"])
         if node["left"]["type"] == "VariableDeclaration":
-            target = Name(id=node["left"]["declarations"][0]["id"]["name"])
+            target = ast.Name(id=node["left"]["declarations"][0]["id"]["name"])
 
-        return For(
+        return ast.For(
             iter=iter_elem,
             target=target,
             body=body,
@@ -610,7 +542,7 @@ class ASTConverter:
 
     def visit_ForStatement(self, node: dict):
         init = [Empty()]
-        test = Constant(value=True)
+        test = ast.Constant(value=True)
         update = Empty()
 
         if "init" in node:
@@ -622,8 +554,8 @@ class ASTConverter:
         if "update" in node:
             update = self.visit(node.get("update"))
 
-        if isinstance(update, expr):
-            update = Expr(value=update)
+        if isinstance(update, ast.expr):
+            update = ast.Expr(value=update)
 
         body = self.visit(node["body"])
         if not isinstance(body, list):
@@ -632,7 +564,7 @@ class ASTConverter:
 
         return [
             *init,
-            While(
+            ast.While(
                 test=test,
                 body=body,
                 orelse=[],
@@ -640,36 +572,36 @@ class ASTConverter:
         ]
 
     def visit_UnaryExpression(self, node: dict):
-        op = {"-": USub(), "~": Invert(), "!": Not(), "+": UAdd()}.get(node["operator"])
+        op = {"-": ast.USub(), "~": ast.Invert(), "!": ast.Not(), "+": ast.UAdd()}.get(node["operator"])
 
         if op is not None:
-            return UnaryOp(op=op, operand=self.visit(node["argument"]))
+            return ast.UnaryOp(op=op, operand=self.visit(node["argument"]))
 
         if node["operator"]:
-            return Call(func=Name(id="type"), args=[self.visit(node["argument"])])
+            return ast.Call(func=ast.Name(id="type"), args=[self.visit(node["argument"])])
 
     def visit_ArrayExpression(self, node: dict):
         elements = [self.visit(e) for e in node["elements"]]
-        return List(elts=elements)
+        return ast.List(elts=elements)
 
     def visit_MemberExpression(self, node: dict):
         value = self.visit(node["object"])
 
         if node["computed"]:
-            return Subscript(value=value, slice=self.visit(node["property"]))
+            return ast.Subscript(value=value, slice=self.visit(node["property"]))
 
         if node["property"]["name"] == "length":
             params = [self.visit(node["object"])]
-            return Call(func=Name(id="len"), args=params)
+            return ast.Call(func=ast.Name(id="len"), args=params)
 
-        return Attribute(value=value, attr=node["property"]["name"])
+        return ast.Attribute(value=value, attr=node["property"]["name"])
 
     def visit_ForOfStatement(self, node: dict):
         target = self.visit(node["left"])
         if node["left"]["type"] == "VariableDeclaration":
-            target = Name(id=node["left"]["declarations"][0]["id"]["name"])
+            target = ast.Name(id=node["left"]["declarations"][0]["id"]["name"])
 
-        return For(
+        return ast.For(
             iter=self.visit(node["right"]),
             target=target,
             body=self.visit(node["body"]),
@@ -677,7 +609,7 @@ class ASTConverter:
         )
 
     def visit_WhileStatement(self, node: dict):
-        return While(
+        return ast.While(
             test=self.visit(node["test"]),
             body=self.visit(node["body"]),
             orelse=[],
@@ -688,20 +620,20 @@ class ASTConverter:
 
         return [
             body,
-            While(test=self.visit(node["test"]), body=body, orelse=[]),
+            ast.While(test=self.visit(node["test"]), body=body, orelse=[]),
         ]
 
     def visit_ReturnStatement(self, node: dict):
-        return Return(value=self.visit(node.get("argument")))
+        return ast.Return(value=self.visit(node.get("argument")))
 
     def visit_BreakStatement(self, _: dict):
-        return Break()
+        return ast.Break()
 
     def visit_ContinueStatement(self, _: dict):
-        return Continue()
+        return ast.Continue()
 
     def visit_ConditionalExpression(self, node: dict):
-        return IfExp(
+        return ast.IfExp(
             test=self.visit(node["test"]),
             body=self.visit(node["consequent"]),
             orelse=self.visit(node["alternate"]),
@@ -719,25 +651,25 @@ class ASTConverter:
 
             # TODO novinxy: instead of of append add some simple abstraction
             self.injected_blocks.append(
-                FunctionDef(
+                ast.FunctionDef(
                     name=func_name,
-                    args=arguments(args=args, defaults=defaults),
+                    args=ast.arguments(args=args, defaults=defaults),
                     body=self.visit(node_body),
                 )
             )
 
-            return Name(id=func_name)
+            return ast.Name(id=func_name)
 
         if node_body["body"] == []:
-            body = Expr(Constant(value=Ellipsis))
+            body = ast.Expr(ast.Constant(value=Ellipsis))
         else:
             body = self.visit(node_body["body"][0])
 
-        if isinstance(body, Expr) or isinstance(body, Return):
+        if isinstance(body, ast.Expr) or isinstance(body, ast.Return):
             body = body.value
 
-        return Lambda(
-            args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+        return ast.Lambda(
+            args=ast.arguments(args=[ast.arg(p["name"]) for p in node["params"]]),
             body=body,
         )
 
@@ -748,31 +680,31 @@ class ASTConverter:
             args, defaults = self.parse_function_params(node["params"])
 
             self.injected_blocks.append(
-                FunctionDef(
+                ast.FunctionDef(
                     name="local_anonymous_func",
-                    args=arguments(args=args, defaults=defaults),
+                    args=ast.arguments(args=args, defaults=defaults),
                     body=self.visit(node_body),
                 )
             )
 
-            return Name(id="local_anonymous_func")
+            return ast.Name(id="local_anonymous_func")
 
         body = self.visit(node_body)
         if isinstance(body, list):
             body = body[0]
 
-        if isinstance(body, Expr) or isinstance(body, Return):
+        if isinstance(body, ast.Expr) or isinstance(body, ast.Return):
             body = body.value
 
-        return Lambda(
-            args=arguments(args=[arg(p["name"]) for p in node["params"]]),
+        return ast.Lambda(
+            args=ast.arguments(args=[ast.arg(p["name"]) for p in node["params"]]),
             body=body,
         )
 
     def visit_SwitchStatement(self, node: dict):
         cases = []
         for idx, case_ in enumerate(node["cases"]):
-            pattern = self.visit(case_.get("test"), Name(id="_"))
+            pattern = self.visit(case_.get("test"), ast.Name(id="_"))
 
             all_consequent = itertools.chain.from_iterable(c["consequent"] for c in node["cases"][idx::])
             all_cases = []
@@ -783,14 +715,14 @@ class ASTConverter:
                 else:
                     all_cases.append(result)
 
-            body = list(itertools.takewhile(lambda c: not isinstance(c, Break), all_cases))
+            body = list(itertools.takewhile(lambda c: not isinstance(c, ast.Break), all_cases))
 
             if body == []:
-                body += [Expr(Constant(value=Ellipsis))]
+                body += [ast.Expr(ast.Constant(value=Ellipsis))]
 
-            cases.append(match_case(pattern=pattern, body=body))
+            cases.append(ast.match_case(pattern=pattern, body=body))
 
-        return Match(subject=self.visit(node["discriminant"]), cases=cases)
+        return ast.Match(subject=self.visit(node["discriminant"]), cases=cases)
 
     def visit_TryStatement(self, node: dict):
         # somehow bodies in here work strange as they are missing Expression for CallExpressions
@@ -801,7 +733,7 @@ class ASTConverter:
         if "finalizer" in node:
             finalbody = self.visit(node["finalizer"])
 
-        return Try(
+        return ast.Try(
             body=self.visit(node["block"]),
             handlers=[self.visit(node.get("handler"), [])],
             finalbody=finalbody,
@@ -811,8 +743,8 @@ class ASTConverter:
         # somehow bodies in here work strange as they are missing Expression for CallExpressions
         # it's not needed in other places and is safer that way
         # I'm thinking if maybe we should write special method for it and wrap calls
-        return ExceptHandler(
-            type=Name(id="Exception"),
+        return ast.ExceptHandler(
+            type=ast.Name(id="Exception"),
             name=node["param"]["name"],
             body=self.visit(node["body"]),
         )
@@ -820,25 +752,25 @@ class ASTConverter:
     def visit_ThrowStatement(self, node: dict):
         exc = self.visit(node["argument"])
         if node["argument"]["type"] == "Literal":
-            exc = Call(func=Name("Exception"), args=[exc])
+            exc = ast.Call(func=ast.Name("Exception"), args=[exc])
 
-        return Raise(exc=exc)
+        return ast.Raise(exc=exc)
 
     def visit_ImportDeclaration(self, node: dict):
         module_name = node["source"]["value"].split(".")[0].replace("/", ".")
 
         if not node["specifiers"]:
-            return Import(names=[alias(name=module_name)])
+            return ast.Import(names=[ast.alias(name=module_name)])
 
         if node["specifiers"][0]["type"] == "ImportNamespaceSpecifier":
             asname = node["specifiers"][0]["local"]["name"]
             if asname == module_name:
                 asname = None
-            return Import(names=[alias(name=module_name, asname=asname)])
+            return ast.Import(names=[ast.alias(name=module_name, asname=asname)])
 
-        return ImportFrom(
+        return ast.ImportFrom(
             module=module_name,
-            names=[alias(name=s["local"]["name"]) for s in node["specifiers"]],
+            names=[ast.alias(name=s["local"]["name"]) for s in node["specifiers"]],
             level=0,
         )
 
@@ -847,7 +779,7 @@ class ASTConverter:
         if base := node.get("superClass"):
             bases = [self.visit(base)]
 
-        return ClassDef(
+        return ast.ClassDef(
             name=node["id"]["name"],
             bases=bases,
             body=self.visit(node["body"]),
@@ -857,7 +789,7 @@ class ASTConverter:
         class_body = [self.visit(n) for n in node["body"]]
 
         if class_body == []:
-            class_body += [Expr(Constant(value=Ellipsis))]
+            class_body += [ast.Expr(ast.Constant(value=Ellipsis))]
 
         return class_body
 
@@ -865,42 +797,42 @@ class ASTConverter:
         body = self.visit(node["value"]["body"])
 
         params, defaults = self.parse_function_params(node["value"]["params"])
-        decorators = [Name(id="staticmethod")]
+        decorators = [ast.Name(id="staticmethod")]
 
         if not node["static"]:
             decorators = []
-            params = [Name(id="self"), *params]
+            params = [ast.Name(id="self"), *params]
 
         func_name = "__init__"
         if node["kind"] != "constructor":
             func_name = node["key"]["name"]
 
-        return FunctionDef(
+        return ast.FunctionDef(
             name=func_name,
-            args=arguments(args=params, defaults=defaults),
+            args=ast.arguments(args=params, defaults=defaults),
             body=body,
             decorator_list=decorators,
         )
 
     def visit_ThisExpression(self, _: dict):
-        return Name(id="self")
+        return ast.Name(id="self")
 
     def visit_Super(self, _: dict):
-        return Call(func=Name(id="super"))
+        return ast.Call(func=ast.Name(id="super"))
 
     def visit_TemplateLiteral(self, node: dict):
         if not node["expressions"]:
-            value = Constant(value=node["quasis"][0]["value"]["raw"])
+            value = ast.Constant(value=node["quasis"][0]["value"]["raw"])
             return value
 
         joined_str = []
         for constant, expression in itertools.zip_longest(node["quasis"], node["expressions"]):
             if constant:
-                joined_str.append(Constant(constant["value"]["raw"]))
+                joined_str.append(ast.Constant(constant["value"]["raw"]))
             if expression:
-                joined_str.append(FormattedValue(value=self.visit(expression), conversion=-1))
+                joined_str.append(ast.FormattedValue(value=self.visit(expression), conversion=-1))
 
-        return JoinedStr(values=joined_str)
+        return ast.JoinedStr(values=joined_str)
 
     def visit_NewExpression(self, node: dict):
         if node["callee"]["name"] == "RegExp":
@@ -910,9 +842,13 @@ class ASTConverter:
             if node["arguments"][0]["type"] == "Literal":
                 regexp_value = RawString(value=node["arguments"][0]["value"].replace("?<", "?P<"))
 
-            return Call(func=Attribute(value=Name(id="re"), attr="compile"), args=[regexp_value], keywords=[])
+            return ast.Call(
+                func=ast.Attribute(value=ast.Name(id="re"), attr="compile"), args=[regexp_value], keywords=[]
+            )
 
-        return Call(func=self.visit(node["callee"]), args=[self.visit(arg) for arg in node["arguments"]], keywords=[])
+        return ast.Call(
+            func=self.visit(node["callee"]), args=[self.visit(arg) for arg in node["arguments"]], keywords=[]
+        )
 
     def visit_SequenceExpression(self, node: dict):
         return [self.visit(e) for e in node["expressions"]]
