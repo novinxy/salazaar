@@ -1,6 +1,6 @@
 import esprima
 
-from salazaar.ast_converter import ASTConverter
+from salazaar.js_converter import JsConverter
 from salazaar.parser import Parser
 
 
@@ -9,7 +9,7 @@ def translate(js_code: str) -> str:
 
     js_ast = module.toDict()
 
-    py_ast = ASTConverter().visit(js_ast)
+    py_ast = JsConverter().visit(js_ast)
 
     parser = Parser()
 

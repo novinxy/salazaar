@@ -48,7 +48,7 @@ operators: dict[str, Any] = {
 }
 
 
-class ASTConverter:
+class JsConverter:
     def __init__(self):
         self.injected_blocks = []
         self.imports = set()
